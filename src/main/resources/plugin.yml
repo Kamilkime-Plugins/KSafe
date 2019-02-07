@@ -1,0 +1,19 @@
+main: kamilki.me.ksafe.KSafe
+name: KSafe
+version: 1.0
+author: Kamilkime
+
+commands:
+  ksafe:
+    aliases: [schowek, safe, kschowek]
+    description: Open your safe
+
+permissions:
+  ksafe.open:
+    default: true
+  ksafe.bypass.limit:
+    default: op
+  ksafe.bypass.supply:
+    default: op
+  ksafe.reload:
+    default: op
