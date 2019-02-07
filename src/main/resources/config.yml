@@ -1,0 +1,261 @@
+# Type of data storage: SQLITE or MYSQL
+dataStorage: SQLITE
+
+# Information for the SQLITE data storage:
+#  > fileName - name of the file in which the database will be created
+#  > tableName - name of the database table used by the plugin
+sqlite:
+  fileName: "safes.sqlite"
+  tableName: "ksafe"
+
+# Information for the MYSQL data storage:
+#  > hostname - host of the database
+#  > port - port of the database
+#  > database - name of the database
+#  > username - username for the database
+#  > password - password for the database
+#  > tableName - name of the database table used by the plugin
+#  > useSSL - whether to use SSL when connecting to the database
+#  > poolSize - number of database connections reserved by the plugin
+#  > connectionTimeout - database connection timeout delay, in milliseconds
+mysql:
+  hostname: "127.0.0.1"
+  port: "3306"
+  database: "minecraft"
+  username: "root"
+  password: "root"
+  tableName: "ksafe"
+  useSSL: true
+  poolSize: 5
+  connectionTimeout: 20000
+
+# Whether to enable the auto save task, disabling it is not recommended
+enableAutoSave: true
+
+# Interval for the auto save task, in ticks (1 second = 20 ticks)
+autoSaveInterval: 3000
+
+# Item limits for the players
+# Correct limit syntax: "MATERIAL:durability amount", durability is optional
+limits:
+- "GOLDEN_APPLE:1 5"
+- "GOLDEN_APPLE 10"
+- "ENDER_PEARL 8"
+
+# Whether to automatically limit items in player's inventories
+# Use permission 'ksafe.bypass.limit' to bypass this task
+autoLimit: true
+
+# Interval for the auto limit task, in ticks (1 second = 20 ticks)
+limitTaskInterval: 50
+
+# Whether to automatically supply player inventories with items from their safes
+# Used if amount of items in player inventory is below limit
+# Use permission 'ksafe.bypass.supply' to bypass this task
+autoSupply: true
+
+# Interval for the auto supply task, in ticks (1 second = 20 ticks)
+autoSupplyTaskInterval: 300
+
+# Whether to allow item withdrawal using the GUI
+# If true - left mouse click will be used for withdrawal
+allowInvSafeWithdrawal: true
+
+# Whether to withdraw all items from the safe
+# If false - the amount of withdrawn items will keep the overall inventory amount below or equal to the limit
+# If true - all items will be withdrawn, ignoring the limits
+withdrawAll: false
+
+# Whether to allow item deposit using the GUI
+# If true - right mouse click will be used for deposit
+allowInvSafeDeposit: true
+
+# Whether to deposit all items to the safe
+# If false - the amount of deposited items will keep the overall inventory amount below or equal to the limit
+# If true - all items will be deposited, ignoring the limits
+depositAll: true
+
+# Items for the inventory creation
+# Item names (section names) must be unique
+# Supported modifiers:
+#  > type:durability - type and durability of the item, durability is optional
+#  > amount - amount of the displayed item
+#  > name - display name of the item
+#  > lore - lore of the item
+#  > enchants - list of item enchants, list items must be of syntax 'enchantment level'
+#  > withdraw - what type of items will be withdrawn/deposited when clicking on this item
+#
+# Item name and lore can contains following variables:
+#  > {SAFE-type:durability} - how much of the given item is currently in player's safe
+#  > {INV-type:durability} - how much of the given item is currently in player's inventory
+#  > {WITHDRAW-type:durability} - how much of the given item can be withdrawn by the player
+#  > {DEPOSIT-type:durability} - how much of the given item can be deposited by the player
+#  > {LIMIT-type:durability} - what is the limit for the given item
+inventoryItems:
+  blank:
+    type: "STAINED_GLASS_PANE:15"
+    name: " "
+  enchApple:
+    type: "GOLDEN_APPLE:1"
+    name: "&6Enchanted apples"
+    lore:
+    - "&7In safe: &a{SAFE-GOLDEN_APPLE:1}"
+    - "&7In your inv: &a{INV-GOLDEN_APPLE:1}"
+    - "&7Can withdraw: &a{WITHDRAW-GOLDEN_APPLE:1}"
+    - "&7Can deposit: &a{DEPOSIT-GOLDEN_APPLE:1}"
+    - "&7Limit: &a{LIMIT-GOLDEN_APPLE:1}"
+    - ""
+    - "&aLeft click &7to withdraw items"
+    - "&aRight click &7to deposit items"
+    withdraw:
+    - "GOLDEN_APPLE:1"
+  gApple:
+    type: "GOLDEN_APPLE"
+    name: "&eGolden apples"
+    lore:
+    - "&7In safe: &a{SAFE-GOLDEN_APPLE}"
+    - "&7In your inv: &a{INV-GOLDEN_APPLE}"
+    - "&7Can withdraw: &a{WITHDRAW-GOLDEN_APPLE}"
+    - "&7Can deposit: &a{DEPOSIT-GOLDEN_APPLE}"
+    - "&7Limit: &a{LIMIT-GOLDEN_APPLE}"
+    - ""
+    - "&aLeft click &7to withdraw items"
+    - "&aRight click &7to deposit items"
+    withdraw:
+    - "GOLDEN_APPLE"
+  pearl:
+    type: "ENDER_PEARL"
+    name: "&9Ender pearls"
+    lore:
+    - "&7In safe: &a{SAFE-ENDER_PEARL}"
+    - "&7In your inv: &a{INV-ENDER_PEARL}"
+    - "&7Can withdraw: &a{WITHDRAW-ENDER_PEARL}"
+    - "&7Can deposit: &a{DEPOSIT-ENDER_PEARL}"
+    - "&7Limit: &a{LIMIT-ENDER_PEARL}"
+    - ""
+    - "&aLeft click &7to withdraw items"
+    - "&aRight click &7to deposit items"
+    withdraw:
+    - "ENDER_PEARL"
+  all:
+    type: "HOPPER"
+    name: "&dWithdraw or deposit all"
+    lore:
+    - "&aLeft click &7to withdraw all items"
+    - "&aRight click &7to deposit all items"
+    withdraw:
+    - "GOLDEN_APPLE:1"
+    - "GOLDEN_APPLE"
+    - "ENDER_PEARL"
+
+# Title of the safe inventory, max 32 characters
+inventoryTitle: "&5&lYour private item safe"
+
+# List of the items in the safe inventory
+# Every list item is the next slot of the inventory
+# The item names given here must be defined in the inventoryItems section
+# The inventory size must be a multiple of 9, not bigger than 54
+inventory:
+- "blank"
+- "blank"
+- "blank"
+- "blank"
+- "blank"
+- "blank"
+- "blank"
+- "blank"
+- "blank"
+- "blank"
+- "enchApple"
+- "blank"
+- "gApple"
+- "blank"
+- "pearl"
+- "blank"
+- "all"
+- "blank"
+- "blank"
+- "blank"
+- "blank"
+- "blank"
+- "blank"
+- "blank"
+- "blank"
+- "blank"
+- "blank"
+
+# Names for the items, used when displaying messages
+itemNames:
+- "GOLDEN_APPLE:1 enchanted apple"
+- "GOLDEN_APPLE golden apple"
+- "ENDER_PEARL ender pearl"
+
+# When the auto limit task takes items from the player
+# Following variables can be used:
+#  > {ITEM} - name of the taken item
+#  > {LIMIT} - limit of the item
+#  > {REMOVED} - amount of the item that was removed from the player's inventory
+#  > {OLD-AMOUNT} - old amount of the item in player's inventory
+#  > {NEW-AMOUNT} - new amount of the item in player's inventory
+#  > {OLD-SAFE} - old amount of the item in player's safe
+#  > {NEW-SAFE} - new amount of the item in player's safe
+itemsTakenMsg: "&7&l[KSafe] &aYou had to many &7{ITEM} &ain your inventory, an amount of &7{REMOVED} &awas moved to your safe!"
+
+# When the auto supply task gives items to the player
+# Following variables can be used:
+#  > {ITEM} - name of the given item
+#  > {LIMIT} - limit of the item
+#  > {UNDER} - amount of items the player was under limit
+#  > {ADDED} - amount of the item that was added to the player's inventory
+#  > {OLD-AMOUNT} - old amount of the item in player's inventory
+#  > {NEW-AMOUNT} - new amount of the item in player's inventory
+#  > {OLD-SAFE} - old amount of the item in player's safe
+#  > {NEW-SAFE} - new amount of the item in player's safe
+itemsSuppliedMsg: "&7&l[KSafe] &aYou had &7{UNDER} {ITEM} &aunder limit, &7{ADDED} &awas given from your safe!"
+
+# When the player withdraws items from the safe
+# Following variables can be used:
+#  > {ITEM} - name of the withdrawn item
+#  > {LIMIT} - limit of the item
+#  > {ADDED} - amount of the item that was added to the player's inventory
+#  > {OLD-AMOUNT} - old amount of the item in player's inventory
+#  > {NEW-AMOUNT} - new amount of the item in player's inventory
+#  > {OLD-SAFE} - old amount of the item in player's safe
+#  > {NEW-SAFE} - new amount of the item in player's safe
+itemsWithdrawnMsg: "&7&l[KSafe] &aYou withdrew &7{ADDED}x {ITEM} &afrom your safe!"
+
+# When the player deposits items to the safe
+# Following variables can be used:
+#  > {ITEM} - name of the deposited item
+#  > {LIMIT} - limit of the item
+#  > {ADDED} - amount of the item that was added to the safe
+#  > {OLD-AMOUNT} - old amount of the item in player's inventory
+#  > {NEW-AMOUNT} - new amount of the item in player's inventory
+#  > {OLD-SAFE} - old amount of the item in player's safe
+#  > {NEW-SAFE} - new amount of the item in player's safe
+itemsDepositedMsg: "&7&l[KSafe] &aYou deposited &7{ADDED}x {ITEM} &ato your safe!"
+
+# When the player can't withdraw more items
+# Following variables can be used:
+#  > {ITEM} - name of the withdrawn item
+#  > {LIMIT} - limit of the item
+#  > {AMOUNT} - amount of the item in player's inventory
+cantWithdrawMsg: "&7&l[KSafe] &cYou already have &7{AMOUNT}x {ITEM} &cin your inventory, you can't withdraw more (limit - &7{LIMIT}&c)"
+
+# When the player doesn't have any items to deposit
+# Following variables can be used:
+#  > {ITEM} - name of the deposited item
+#  > {LIMIT} - limit of the item
+#  > {AMOUNT} - amount of the item in player's inventory
+cantDepositMsg: "&7&l[KSafe] &cYou don't have enough of &7{ITEM} &cto deposit it!"
+
+# When safe is empty and items can't be withdrawn
+# Following variables can be used:
+#  > {ITEM} - name of the withdrawn item
+safeEmptyMsg: "&7&l[KSafe] &cYour safe for item &7{ITEM} &cis empty, you can't withdraw items from it!"
+
+# When config file is reloaded and the player has an open safe inventory (used for safety)
+reloadInvCloseMsg: "&7&l[KSafe] &cPlugin is reloading, please re-open your safe using the &7/ksafe &ccommand!"
+
+# When config file is reloaded using '/ksafe reload' command (requires 'ksafe.reload' permission)
+cfgReloadedMsg: "&7&l[KSafe] &aConfig file successfully reloaded!"
