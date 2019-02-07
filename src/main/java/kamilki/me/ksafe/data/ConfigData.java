@@ -210,6 +210,8 @@ public final class ConfigData {
     }
 
     public boolean initDatabase() {
+        this.plugin.saveDefaultConfig();
+        
         final FileConfiguration cfg = this.plugin.getConfig();
 
         this.database = new HikariDataSource();
