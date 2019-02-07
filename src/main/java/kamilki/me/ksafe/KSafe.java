@@ -99,7 +99,9 @@ public final class KSafe extends JavaPlugin {
             player.sendMessage(this.configData.reloadInvCloseMsg);
         }
         
-        this.pluginData.saveUsers();
+        if (this.pluginData != null) {
+            this.pluginData.saveUsers();
+        }
     }
 
 }

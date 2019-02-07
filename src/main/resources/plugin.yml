@@ -2,6 +2,7 @@ main: kamilki.me.ksafe.KSafe
 name: KSafe
 version: 1.0
 author: Kamilkime
+api-version: 1.13
 
 commands:
   ksafe:
