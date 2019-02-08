@@ -63,6 +63,7 @@ public final class ConfigData {
     public boolean withdrawAll;
     public boolean allowInvSafeDeposit;
     public boolean depositAll;
+    public boolean usesMysql;
 
     public final List<ItemStack> inventoryLayout = new ArrayList<>();
     
@@ -236,6 +237,8 @@ public final class ConfigData {
             this.database.setConnectionTimeout(connectionTimeout);
 
             this.tableName = cfg.getString("mysql.tableName");
+            
+            this.usesMysql = true;
         } else {
             try {
                 Class.forName("org.sqlite.JDBC");
@@ -243,7 +246,7 @@ public final class ConfigData {
                 this.plugin.getLogger().warning("Failed to initialize SQLite driver!");
                 return false;
             }
-
+            
             final File sqliteFile = new File(this.plugin.getDataFolder(), cfg.getString("sqlite.fileName"));
             if (!sqliteFile.exists()) {
                 try {
@@ -258,6 +261,8 @@ public final class ConfigData {
             }
 
             this.database.setJdbcUrl("jdbc:sqlite:" + sqliteFile.getAbsolutePath());
+            this.database.setConnectionTestQuery("SELECT * FROM sqlite_master");
+            
             this.tableName = cfg.getString("sqlite.tableName");
         }
 
