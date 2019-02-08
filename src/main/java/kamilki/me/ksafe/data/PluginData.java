@@ -77,7 +77,12 @@ public final class PluginData {
             return;
         }
 
-        final String sql = "INSERT OR REPLACE INTO `" + this.configData.tableName + "` (`uuid`, `safeData`) VALUES (?, ?);";
+        final String sql;
+        if (this.configData.usesMysql) {
+            sql = "INSERT INTO `" + this.configData.tableName + "` (`uuid`, `safeData`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `safeData`=?;";
+        } else {
+            sql = "INSERT OR REPLACE INTO `" + this.configData.tableName + "` (`uuid`, `safeData`) VALUES (?, ?);";
+        }
 
         try (final Connection connection = this.configData.database.getConnection();
                         final PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -92,6 +97,10 @@ public final class PluginData {
 
                 stmt.setString(1, user.toString());
                 stmt.setString(2, dataBuilder.substring(1));
+                
+                if (this.configData.usesMysql) {
+                    stmt.setString(3, dataBuilder.substring(1));
+                }
 
                 stmt.executeUpdate();
             }
@@ -118,6 +127,7 @@ public final class PluginData {
 
             stmt.executeUpdate();
         } catch (final SQLException exception) {
+            exception.printStackTrace();
             this.plugin.getLogger().warning("Failed to create database table!");
             return false;
         }
