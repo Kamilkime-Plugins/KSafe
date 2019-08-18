@@ -112,12 +112,6 @@ public final class PluginData {
         }
     }
 
-    public void saveUsersAsync() {
-        Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
-            this.saveUsers();
-        });
-    }
-
     private boolean initTable() {
         final String sql = "CREATE TABLE IF NOT EXISTS `" + this.configData.tableName
                         + "` (`uuid` VARCHAR(36) NOT NULL, `safeData` TEXT NOT NULL, PRIMARY KEY(uuid));";
