@@ -33,7 +33,7 @@ public class PlayerJoinListener implements Listener {
     
     @EventHandler
     public void onJoin(final PlayerJoinEvent event) {
-        this.pluginData.userSafes.computeIfAbsent(event.getPlayer().getUniqueId(), key -> new ConcurrentHashMap<>());
+        this.pluginData.userSafes.putIfAbsent(event.getPlayer().getUniqueId(), new ConcurrentHashMap<>());
     }
     
 }

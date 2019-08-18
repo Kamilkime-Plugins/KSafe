@@ -74,7 +74,7 @@ public final class KSafe extends JavaPlugin {
         this.getCommand("ksafe").setExecutor(new SafeCommand(this.configData, this.pluginData));
         
         for (final Player player : Bukkit.getOnlinePlayers()) {
-            this.pluginData.userSafes.computeIfAbsent(player.getUniqueId(), key -> new ConcurrentHashMap<>());
+            this.pluginData.userSafes.putIfAbsent(player.getUniqueId(), new ConcurrentHashMap<>());
         }
     }
     

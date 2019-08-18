@@ -16,6 +16,7 @@
  */
 package kamilki.me.ksafe.command;
 
+import com.google.common.collect.Sets;
 import kamilki.me.ksafe.data.ConfigData;
 import kamilki.me.ksafe.data.PluginData;
 import kamilki.me.ksafe.replacement.ItemReplacementType;
@@ -34,7 +35,7 @@ import java.util.*;
 
 public class SafeCommand implements CommandExecutor {
 
-    private static final Set<String> reloadArgs = new HashSet<>(Arrays.asList("reload", "rl"));
+    private static final Set<String> reloadArgs = Sets.newHashSet("reload", "rl");
 
     private final ConfigData configData;
     private final PluginData pluginData;
