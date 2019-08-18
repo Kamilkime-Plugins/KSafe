@@ -114,7 +114,7 @@ public final class PluginData {
 
     private boolean initTable() {
         final String sql = "CREATE TABLE IF NOT EXISTS `" + this.configData.tableName
-                        + "` (`uuid` VARCHAR(36) NOT NULL, `safeData` TEXT NOT NULL, PRIMARY KEY(uuid));";
+                        + "` (`uuid` CHAR(36) NOT NULL, `safeData` TEXT NOT NULL, PRIMARY KEY(uuid));";
 
         try (final Connection connection = this.configData.database.getConnection();
                         final PreparedStatement stmt = connection.prepareStatement(sql)) {
