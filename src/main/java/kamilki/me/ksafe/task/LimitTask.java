@@ -17,13 +17,13 @@
 package kamilki.me.ksafe.task;
 
 import kamilki.me.ksafe.data.ConfigData;
-import kamilki.me.ksafe.data.ItemData;
 import kamilki.me.ksafe.data.PluginData;
 import kamilki.me.ksafe.util.InventoryUtil;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryView;
+import org.bukkit.material.MaterialData;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Map;
@@ -47,28 +47,28 @@ public class LimitTask extends BukkitRunnable {
             }
             
             boolean hasChanged = false;
-            final Map<ItemData, Integer> userSafe = this.pluginData.userSafes.get(player.getUniqueId());
+            final Map<MaterialData, Integer> userSafe = this.pluginData.userSafes.get(player.getUniqueId());
             
-            for (final Entry<ItemData, Integer> limit : this.configData.itemLimits.entrySet()) {
-                final ItemData itemData = limit.getKey();
+            for (final Entry<MaterialData, Integer> limit : this.configData.itemLimits.entrySet()) {
+                final MaterialData materialData = limit.getKey();
                 final int limitValue = limit.getValue();
                 
-                final int invAmount = InventoryUtil.getInventoryAmount(player, itemData);
+                final int invAmount = InventoryUtil.getInventoryAmount(player, materialData);
                 if (invAmount <= limitValue) {
                     continue;
                 }
                 
                 final int toRemove = invAmount - limitValue;
-                InventoryUtil.removeFromInventory(player, itemData, toRemove);
+                InventoryUtil.removeFromInventory(player, materialData, toRemove);
                 
-                final int safeAmount = userSafe.getOrDefault(itemData, 0);
-                userSafe.put(itemData, safeAmount + toRemove);
+                final int safeAmount = userSafe.getOrDefault(materialData, 0);
+                userSafe.put(materialData, safeAmount + toRemove);
                 
                 this.pluginData.changedUsers.add(player.getUniqueId());
                 
                 String message = this.configData.itemsTakenMsg;
                 
-                message = StringUtils.replace(message, "{ITEM}", this.configData.itemNames.get(itemData));
+                message = StringUtils.replace(message, "{ITEM}", this.configData.itemNames.get(materialData));
                 message = StringUtils.replace(message, "{REMOVED}", Integer.toString(toRemove));
                 message = StringUtils.replace(message, "{LIMIT}", Integer.toString(limitValue));
                 message = StringUtils.replace(message, "{OLD-AMOUNT}", Integer.toString(invAmount));

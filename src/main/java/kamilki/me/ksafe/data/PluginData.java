@@ -17,7 +17,9 @@
 package kamilki.me.ksafe.data;
 
 import kamilki.me.ksafe.KSafe;
+import kamilki.me.ksafe.util.ItemUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.material.MaterialData;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -32,7 +34,7 @@ import java.util.logging.Level;
 
 public final class PluginData {
 
-    public final Map<UUID, Map<ItemData, Integer>> userSafes = new ConcurrentHashMap<>();
+    public final Map<UUID, Map<MaterialData, Integer>> userSafes = new ConcurrentHashMap<>();
     public final Set<UUID> changedUsers = ConcurrentHashMap.newKeySet();
 
     private final KSafe plugin;
@@ -57,12 +59,12 @@ public final class PluginData {
 
                 while (resultSet.next()) {
                     final UUID user = UUID.fromString(resultSet.getString("uuid"));
-                    final Map<ItemData, Integer> userSafe = new ConcurrentHashMap<>();
+                    final Map<MaterialData, Integer> userSafe = new ConcurrentHashMap<>();
 
                     final String[] safeDataSplit = resultSet.getString("safeData").split(";");
                     for (final String safeDataEntry : safeDataSplit) {
                         final String[] entrySplit = safeDataEntry.split("-");
-                        userSafe.put(ItemData.fromString(entrySplit[0]), Integer.parseInt(entrySplit[1]));
+                        userSafe.put(ItemUtil.getMaterialData(entrySplit[0]), Integer.parseInt(entrySplit[1]));
                     }
 
                     this.userSafes.put(user, userSafe);
@@ -89,11 +91,14 @@ public final class PluginData {
                         final PreparedStatement stmt = connection.prepareStatement(sql)) {
 
             for (final UUID user : this.changedUsers) {
-                final Map<ItemData, Integer> safe = this.userSafes.get(user);
+                final Map<MaterialData, Integer> safe = this.userSafes.get(user);
                 final StringBuilder dataBuilder = new StringBuilder();
 
-                for (final Entry<ItemData, Integer> safeEntry : safe.entrySet()) {
-                    dataBuilder.append(";").append(safeEntry.getKey().toString()).append("-").append(safeEntry.getValue());
+                for (final Entry<MaterialData, Integer> safeEntry : safe.entrySet()) {
+                    final MaterialData materialData = safeEntry.getKey();
+                    final String materialDataString = materialData.getItemType() + ":" + materialData.getData();
+
+                    dataBuilder.append(";").append(materialDataString).append("-").append(safeEntry.getValue());
                 }
 
                 stmt.setString(1, user.toString());

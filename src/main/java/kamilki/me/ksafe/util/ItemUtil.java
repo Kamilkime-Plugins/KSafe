@@ -22,6 +22,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.MaterialData;
 
 import java.util.List;
 
@@ -84,6 +85,26 @@ public final class ItemUtil {
 
         parsed.setItemMeta(parsedMeta);
         return parsed;
+    }
+
+    public static MaterialData getMaterialData(final String dataString) {
+        final String[] dataSplit = dataString.split(":");
+
+        Material material = Material.matchMaterial(dataSplit[0]);
+        if (material == null) {
+            material = Material.BARRIER;
+            Bukkit.getLogger().warning("[ItemParser] No material found with name " + dataSplit[0].toUpperCase());
+        }
+
+        byte durability;
+        try {
+            durability = dataSplit.length == 1 ? 0 : Byte.parseByte(dataSplit[1]);
+        } catch (final NumberFormatException exception) {
+            durability = 0;
+            Bukkit.getLogger().warning("[ItemParser] " + dataSplit[1] + " is not a valid integer!");
+        }
+
+        return new MaterialData(material, durability);
     }
 
     private ItemUtil() {}
