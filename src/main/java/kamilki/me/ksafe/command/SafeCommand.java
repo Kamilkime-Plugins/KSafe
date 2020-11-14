@@ -1,21 +1,22 @@
-
-/* Copyright (C) 2019 Kamilkime
+/*
+ * Copyright (C) 2020 Kamil Trysiński
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package kamilki.me.ksafe.command;
 
+import com.google.common.collect.Sets;
 import kamilki.me.ksafe.data.ConfigData;
 import kamilki.me.ksafe.data.PluginData;
 import kamilki.me.ksafe.replacement.ItemReplacementType;
@@ -30,11 +31,13 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public class SafeCommand implements CommandExecutor {
 
-    private static final Set<String> reloadArgs = new HashSet<>(Arrays.asList("reload", "rl"));
+    private static final Set<String> reloadArgs = Sets.newHashSet("reload", "rl");
 
     private final ConfigData configData;
     private final PluginData pluginData;
@@ -46,7 +49,7 @@ public class SafeCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(final CommandSender sender, final Command cmd, final String label, final String[] args) {
-        if (args.length != 0 && sender.hasPermission("ksafe.reload") && reloadArgs.contains(args[0].toLowerCase())) {
+        if (args.length != 0 && reloadArgs.contains(args[0].toLowerCase()) && sender.hasPermission("ksafe.reload")) {
             for (final Player player : Bukkit.getOnlinePlayers()) {
                 final InventoryView openInventory = player.getOpenInventory();
                 if (openInventory == null) {
@@ -80,7 +83,7 @@ public class SafeCommand implements CommandExecutor {
 
         final List<ItemStack> inventoryItems = new ArrayList<>();
         for (final ItemStack item : this.configData.inventoryLayout) {
-            final ItemReplacementType replacementType = this.configData.replacableItems.get(item);
+            final ItemReplacementType replacementType = this.configData.replaceableItems.get(item);
             if (replacementType == ItemReplacementType.NONE) {
                 inventoryItems.add(item);
                 continue;

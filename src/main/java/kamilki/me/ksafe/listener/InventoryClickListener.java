@@ -1,17 +1,17 @@
-/* Copyright (C) 2019 Kamilkime
+/*
+ * Copyright (C) 2020 Kamil Trysiński
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package kamilki.me.ksafe.listener;
@@ -19,7 +19,7 @@ package kamilki.me.ksafe.listener;
 import kamilki.me.ksafe.data.ConfigData;
 import kamilki.me.ksafe.data.ItemData;
 import kamilki.me.ksafe.data.PluginData;
-import kamilki.me.ksafe.util.ItemUtil;
+import kamilki.me.ksafe.util.InventoryUtil;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
@@ -51,7 +51,7 @@ public class InventoryClickListener implements Listener {
             return;
         }
 
-        if (!inventory.getTitle().equals(this.configData.inventoryTitle)) {
+        if (!event.getView().getTitle().equals(this.configData.inventoryTitle)) {
             return;
         }
 
@@ -95,7 +95,7 @@ public class InventoryClickListener implements Listener {
         for (final ItemData itemWithdrawal : safeItems) {
             final int limit = this.configData.itemLimits.get(itemWithdrawal);
 
-            final int invAmount = ItemUtil.getInventoryAmount(human, itemWithdrawal);
+            final int invAmount = InventoryUtil.getInventoryAmount(human, itemWithdrawal);
             if (!this.configData.withdrawAll && invAmount >= limit) {
                 String message = this.configData.cantWithdrawMsg;
 
@@ -118,7 +118,7 @@ public class InventoryClickListener implements Listener {
             }
 
             final int toSupply = this.configData.withdrawAll ? safeAmount : Math.min(safeAmount, limit - invAmount);
-            final int notAdded = ItemUtil.addToInventory(human, itemWithdrawal, toSupply);
+            final int notAdded = InventoryUtil.addToInventory(human, itemWithdrawal, toSupply);
 
             final int newSafeAmount = userSafe.getOrDefault(itemWithdrawal, 0) - toSupply + notAdded;
             userSafe.put(itemWithdrawal, newSafeAmount);
@@ -148,7 +148,7 @@ public class InventoryClickListener implements Listener {
 
         for (final ItemData itemDeposit : safeItems) {
             final int limit = this.configData.itemLimits.get(itemDeposit);
-            final int invAmount = ItemUtil.getInventoryAmount(human, itemDeposit);
+            final int invAmount = InventoryUtil.getInventoryAmount(human, itemDeposit);
             
             final int toDeposit = this.configData.depositAll ? invAmount : invAmount - limit;
             if (toDeposit <= 0) {
@@ -161,8 +161,8 @@ public class InventoryClickListener implements Listener {
                 human.sendMessage(message);
                 continue;
             }
-            
-            ItemUtil.removeFromInventory(human, itemDeposit, toDeposit);
+
+            InventoryUtil.removeFromInventory(human, itemDeposit, toDeposit);
             
             final int safeAmount = userSafe.getOrDefault(itemDeposit, 0);
             userSafe.put(itemDeposit, safeAmount + toDeposit);

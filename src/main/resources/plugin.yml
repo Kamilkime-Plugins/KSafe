@@ -1,13 +1,14 @@
 main: kamilki.me.ksafe.KSafe
 name: KSafe
-version: 1.0.2
+version: @version@
 author: Kamilkime
-api-version: 1.13
+description: "A fully configurable item safe for your server"
+website: "https://github.com/Kamilkime/KSafe"
 
 commands:
   ksafe:
     aliases: [schowek, safe, kschowek]
-    description: Open your safe
+    description: Open your item safe
 
 permissions:
   ksafe.open:

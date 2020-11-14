@@ -1,17 +1,17 @@
-/* Copyright (C) 2019 Kamilkime
+/*
+ * Copyright (C) 2020 Kamil Trysiński
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package kamilki.me.ksafe.task;
@@ -19,7 +19,7 @@ package kamilki.me.ksafe.task;
 import kamilki.me.ksafe.data.ConfigData;
 import kamilki.me.ksafe.data.ItemData;
 import kamilki.me.ksafe.data.PluginData;
-import kamilki.me.ksafe.util.ItemUtil;
+import kamilki.me.ksafe.util.InventoryUtil;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -53,13 +53,13 @@ public class LimitTask extends BukkitRunnable {
                 final ItemData itemData = limit.getKey();
                 final int limitValue = limit.getValue();
                 
-                final int invAmount = ItemUtil.getInventoryAmount(player, itemData);
+                final int invAmount = InventoryUtil.getInventoryAmount(player, itemData);
                 if (invAmount <= limitValue) {
                     continue;
                 }
                 
                 final int toRemove = invAmount - limitValue;
-                ItemUtil.removeFromInventory(player, itemData, toRemove);
+                InventoryUtil.removeFromInventory(player, itemData, toRemove);
                 
                 final int safeAmount = userSafe.getOrDefault(itemData, 0);
                 userSafe.put(itemData, safeAmount + toRemove);
