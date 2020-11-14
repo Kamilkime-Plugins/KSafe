@@ -28,6 +28,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.MaterialData;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,9 +71,9 @@ public final class ConfigData {
 
     public final List<ItemStack> inventoryLayout = new ArrayList<>();
     
-    public final Map<ItemData, String> itemNames = new HashMap<>();
-    public final Map<ItemData, Integer> itemLimits = new HashMap<>();
-    public final Map<ItemStack, Set<ItemData>> inventoryItems = new HashMap<>();
+    public final Map<MaterialData, String> itemNames = new HashMap<>();
+    public final Map<MaterialData, Integer> itemLimits = new HashMap<>();
+    public final Map<ItemStack, Set<MaterialData>> inventoryItems = new HashMap<>();
     public final Map<ItemStack, ItemReplacementType> replaceableItems = new HashMap<>();
 
     private final KSafe plugin;
@@ -127,11 +128,6 @@ public final class ConfigData {
                 continue;
             }
             
-            final ItemData limitItem = ItemData.fromString(limitSplit[0]);
-            if (limitItem == null) {
-                continue;
-            }
-            
             final int limit;
             try {
                 limit = Integer.parseInt(limitSplit[1]);
@@ -140,7 +136,7 @@ public final class ConfigData {
                 continue;
             }
             
-            this.itemLimits.put(limitItem, limit);
+            this.itemLimits.put(ItemUtil.getMaterialData(limitSplit[0]), limit);
         }
         
         // Load inventory items
@@ -154,14 +150,9 @@ public final class ConfigData {
             final boolean replaceName = ItemReplacer.needsReplacement(itemMeta.getDisplayName());
             final boolean replaceLore = ItemReplacer.needsReplacement(itemMeta.getLore());
             
-            final Set<ItemData> withdrawals = new HashSet<>();
+            final Set<MaterialData> withdrawals = new HashSet<>();
             for (final String withdraw : itemSection.getStringList("withdraw")) {
-                final ItemData withdrawItem = ItemData.fromString(withdraw);
-                if (withdrawItem == null) {
-                    continue;
-                }
-                
-                withdrawals.add(withdrawItem);
+                withdrawals.add(ItemUtil.getMaterialData(withdraw));
             }
             
             loadedItems.put(itemName, item);
@@ -200,13 +191,7 @@ public final class ConfigData {
                 continue;
             }
             
-            final ItemData itemData = ItemData.fromString(nameEntrySplit[0]);
-            if (itemData == null) {
-                this.plugin.getLogger().warning("Incorrect item type: \"" + nameEntrySplit[0] + "\"");
-                continue;
-            }
-            
-            this.itemNames.put(itemData, StringUtils.join(nameEntrySplit, " ", 1, nameEntrySplit.length));
+            this.itemNames.put(ItemUtil.getMaterialData(nameEntrySplit[0]), StringUtils.join(nameEntrySplit, " ", 1, nameEntrySplit.length));
         }
     }
 

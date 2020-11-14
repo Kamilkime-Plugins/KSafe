@@ -17,13 +17,13 @@
 package kamilki.me.ksafe.task;
 
 import kamilki.me.ksafe.data.ConfigData;
-import kamilki.me.ksafe.data.ItemData;
 import kamilki.me.ksafe.data.PluginData;
 import kamilki.me.ksafe.util.InventoryUtil;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryView;
+import org.bukkit.material.MaterialData;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Map;
@@ -47,33 +47,33 @@ public class AutoSupplyTask extends BukkitRunnable {
             }
             
             boolean hasChanged = false;
-            final Map<ItemData, Integer> userSafe = this.pluginData.userSafes.get(player.getUniqueId());
+            final Map<MaterialData, Integer> userSafe = this.pluginData.userSafes.get(player.getUniqueId());
             
-            for (final Entry<ItemData, Integer> limit : this.configData.itemLimits.entrySet()) {
-                final ItemData itemData = limit.getKey();
+            for (final Entry<MaterialData, Integer> limit : this.configData.itemLimits.entrySet()) {
+                final MaterialData materialData = limit.getKey();
                 final int limitValue = limit.getValue();
                 
-                final int invAmount = InventoryUtil.getInventoryAmount(player, itemData);
+                final int invAmount = InventoryUtil.getInventoryAmount(player, materialData);
                 if (invAmount >= limitValue) {
                     continue;
                 }
                 
-                final int safeAmount = userSafe.getOrDefault(itemData, 0);
+                final int safeAmount = userSafe.getOrDefault(materialData, 0);
                 if (safeAmount == 0) {
                     continue;
                 }
                 
                 final int toSupply = Math.min(safeAmount, limitValue - invAmount);
-                final int notAdded = InventoryUtil.addToInventory(player, itemData, toSupply);
+                final int notAdded = InventoryUtil.addToInventory(player, materialData, toSupply);
                 
-                final int newSafeAmount = userSafe.getOrDefault(itemData, 0) - toSupply + notAdded;
-                userSafe.put(itemData, newSafeAmount);
+                final int newSafeAmount = userSafe.getOrDefault(materialData, 0) - toSupply + notAdded;
+                userSafe.put(materialData, newSafeAmount);
                 
                 this.pluginData.changedUsers.add(player.getUniqueId());
                 
                 String message = this.configData.itemsSuppliedMsg;
                 
-                message = StringUtils.replace(message, "{ITEM}", this.configData.itemNames.get(itemData));
+                message = StringUtils.replace(message, "{ITEM}", this.configData.itemNames.get(materialData));
                 message = StringUtils.replace(message, "{ADDED}", Integer.toString(toSupply - notAdded));
                 message = StringUtils.replace(message, "{UNDER}", Integer.toString(toSupply));
                 message = StringUtils.replace(message, "{LIMIT}", Integer.toString(limitValue));

@@ -1,10 +1,10 @@
 package kamilki.me.ksafe.util;
 
-import kamilki.me.ksafe.data.ItemData;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.material.MaterialData;
 
 import java.util.Map;
 
@@ -32,8 +32,8 @@ public final class InventoryUtil {
         return amount;
     }
 
-    public static int getInventoryAmount(final HumanEntity human, final ItemData itemData) {
-        return getInventoryAmount(human, itemData.getMaterial(), itemData.getDurability());
+    public static int getInventoryAmount(final HumanEntity human, final MaterialData materialData) {
+        return getInventoryAmount(human, materialData.getItemType(), materialData.getData());
     }
 
     public static int addToInventory(final HumanEntity human, final Material material, final short durability, int amount) {
@@ -84,8 +84,8 @@ public final class InventoryUtil {
         return Math.max(amount, 0);
     }
 
-    public static int addToInventory(final HumanEntity human, final ItemData itemData, final int amount) {
-        return addToInventory(human, itemData.getMaterial(), itemData.getDurability(), amount);
+    public static int addToInventory(final HumanEntity human, final MaterialData materialData, final int amount) {
+        return addToInventory(human, materialData.getItemType(), materialData.getData(), amount);
     }
 
     public static void removeFromInventory(final HumanEntity human, final Material material, final short durability, int amount) {
@@ -115,8 +115,8 @@ public final class InventoryUtil {
         }
     }
 
-    public static void removeFromInventory(final HumanEntity human, final ItemData itemData, final int amount) {
-        removeFromInventory(human, itemData.getMaterial(), itemData.getDurability(), amount);
+    public static void removeFromInventory(final HumanEntity human, final MaterialData materialData, final int amount) {
+        removeFromInventory(human, materialData.getItemType(), materialData.getData(), amount);
     }
 
     private InventoryUtil() {}
