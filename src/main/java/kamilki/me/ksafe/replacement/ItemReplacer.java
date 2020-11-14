@@ -1,17 +1,17 @@
-/* Copyright (C) 2019 Kamilkime
+/*
+ * Copyright (C) 2020 Kamil Trysiński
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package kamilki.me.ksafe.replacement;
@@ -19,8 +19,7 @@ package kamilki.me.ksafe.replacement;
 import kamilki.me.ksafe.data.ConfigData;
 import kamilki.me.ksafe.data.ItemData;
 import kamilki.me.ksafe.data.PluginData;
-import kamilki.me.ksafe.util.ItemUtil;
-import kamilki.me.ksafe.util.QuadFunction;
+import kamilki.me.ksafe.util.InventoryUtil;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.entity.Player;
 
@@ -31,13 +30,13 @@ import java.util.Map;
 
 public final class ItemReplacer {
 
-    private static final Map<String, QuadFunction<ItemData, Player, ConfigData, PluginData, String>> REPLACEMENT_PREFIXES;
+    private static final Map<String, ReplacementFunction> REPLACEMENT_PREFIXES;
 
     static {
         REPLACEMENT_PREFIXES = new HashMap<>();
 
         REPLACEMENT_PREFIXES.put("{INV-", (itemData, player, configData, pluginData) -> {
-            return Integer.toString(ItemUtil.getInventoryAmount(player, itemData));
+            return Integer.toString(InventoryUtil.getInventoryAmount(player, itemData));
         });
         
         REPLACEMENT_PREFIXES.put("{LIMIT-", (itemData, player, configData, pluginData) -> {
@@ -49,7 +48,7 @@ public final class ItemReplacer {
         });
         
         REPLACEMENT_PREFIXES.put("{WITHDRAW-", (itemData, player, configData, pluginData) -> {
-            final int inv = ItemUtil.getInventoryAmount(player, itemData);
+            final int inv = InventoryUtil.getInventoryAmount(player, itemData);
             final int limit = configData.itemLimits.getOrDefault(itemData, 0);
             final int safe = pluginData.userSafes.get(player.getUniqueId()).getOrDefault(itemData, 0);
             
@@ -65,7 +64,7 @@ public final class ItemReplacer {
         });
         
         REPLACEMENT_PREFIXES.put("{DEPOSIT-", (itemData, player, configData, pluginData) -> {
-            final int inv = ItemUtil.getInventoryAmount(player, itemData);
+            final int inv = InventoryUtil.getInventoryAmount(player, itemData);
             final int limit = configData.itemLimits.getOrDefault(itemData, 0);
             
             if (configData.depositAll) {
@@ -77,27 +76,28 @@ public final class ItemReplacer {
     }
 
     public static String replace(String name, final Player player, final ConfigData configData, final PluginData pluginData) {
-        for (final String prefix : REPLACEMENT_PREFIXES.keySet()) {
-            int occurence = name.indexOf(prefix);
+        for (final Map.Entry<String, ReplacementFunction> replacement : REPLACEMENT_PREFIXES.entrySet()) {
+            final String prefix = replacement.getKey();
 
-            while (occurence >= 0) {
-                String itemDataName = "";
-                for (int i = occurence + prefix.length(); i < name.length(); i++) {
+            int occurrence = name.indexOf(prefix);
+            while (occurrence >= 0) {
+                final StringBuilder itemDataName = new StringBuilder();
+                for (int i = occurrence + prefix.length(); i < name.length(); i++) {
                     final char c = name.charAt(i);
                     if (c == '}') {
                         break;
                     }
 
-                    itemDataName += c;
-                }
-                
-                final ItemData itemData = ItemData.fromString(itemDataName);
-                if (itemData != null) {
-                    final String replacement = REPLACEMENT_PREFIXES.get(prefix).apply(itemData, player, configData, pluginData);
-                    name = StringUtils.replace(name, prefix + itemDataName + "}", replacement);
+                    itemDataName.append(c);
                 }
 
-                occurence = name.indexOf(prefix);
+                final ItemData itemData = ItemData.fromString(itemDataName.toString());
+                if (itemData != null) {
+                    final String replacementString = replacement.getValue().replace(itemData, player, configData, pluginData);
+                    name = StringUtils.replace(name, prefix + itemDataName + "}", replacementString);
+                }
+
+                occurrence = name.indexOf(prefix);
             }
         }
 

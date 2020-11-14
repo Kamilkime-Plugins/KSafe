@@ -1,17 +1,17 @@
-/* Copyright (C) 2019 Kamilkime
+/*
+ * Copyright (C) 2020 Kamil Trysiński
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package kamilki.me.ksafe;
@@ -21,7 +21,6 @@ import kamilki.me.ksafe.data.ConfigData;
 import kamilki.me.ksafe.data.PluginData;
 import kamilki.me.ksafe.listener.InventoryClickListener;
 import kamilki.me.ksafe.listener.PlayerJoinListener;
-import kamilki.me.ksafe.task.AutoSaveTask;
 import kamilki.me.ksafe.task.AutoSupplyTask;
 import kamilki.me.ksafe.task.LimitTask;
 import org.bukkit.Bukkit;
@@ -54,8 +53,9 @@ public final class KSafe extends JavaPlugin {
         this.pluginData.loadUsers();
         
         if (this.configData.enableAutoSave) {
-            final long autoSaveInterval = this.configData.autoSaveInterval;
-            new AutoSaveTask(this.pluginData).runTaskTimerAsynchronously(this, autoSaveInterval, autoSaveInterval);
+            this.getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
+                this.pluginData.saveUsers();
+            }, this.configData.autoSaveInterval, this.configData.autoSaveInterval);
         }
         
         if (this.configData.autoLimit) {
@@ -74,7 +74,7 @@ public final class KSafe extends JavaPlugin {
         this.getCommand("ksafe").setExecutor(new SafeCommand(this.configData, this.pluginData));
         
         for (final Player player : Bukkit.getOnlinePlayers()) {
-            this.pluginData.userSafes.computeIfAbsent(player.getUniqueId(), key -> new ConcurrentHashMap<>());
+            this.pluginData.userSafes.putIfAbsent(player.getUniqueId(), new ConcurrentHashMap<>());
         }
     }
     

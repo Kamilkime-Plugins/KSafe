@@ -1,17 +1,17 @@
-/* Copyright (C) 2019 Kamilkime
+/*
+ * Copyright (C) 2020 Kamil Trysiński
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package kamilki.me.ksafe.data;
@@ -34,8 +34,11 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public final class ConfigData {
+
+    private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
 
     public HikariDataSource database;
 
@@ -70,7 +73,7 @@ public final class ConfigData {
     public final Map<ItemData, String> itemNames = new HashMap<>();
     public final Map<ItemData, Integer> itemLimits = new HashMap<>();
     public final Map<ItemStack, Set<ItemData>> inventoryItems = new HashMap<>();
-    public final Map<ItemStack, ItemReplacementType> replacableItems = new HashMap<>();
+    public final Map<ItemStack, ItemReplacementType> replaceableItems = new HashMap<>();
 
     private final KSafe plugin;
 
@@ -82,7 +85,7 @@ public final class ConfigData {
         this.plugin.saveDefaultConfig();
         
         if (reload) {
-            this.replacableItems.clear();
+            this.replaceableItems.clear();
             this.inventoryLayout.clear();
             this.inventoryItems.clear();
             this.itemLimits.clear();
@@ -118,7 +121,7 @@ public final class ConfigData {
         
         // Load item limits
         for (final String limitString : cfg.getStringList("limits")) {
-            final String[] limitSplit = limitString.split("\\s+");
+            final String[] limitSplit = WHITESPACE_PATTERN.split(limitString);
             if (limitSplit.length < 2) {
                 this.plugin.getLogger().warning("Incorrect limit: \"" + limitString + "\"");
                 continue;
@@ -145,12 +148,9 @@ public final class ConfigData {
         for (final String itemName : cfg.getConfigurationSection("inventoryItems").getKeys(false)) {
             final ConfigurationSection itemSection = cfg.getConfigurationSection("inventoryItems." + itemName);
             
-            final ItemStack item = ItemUtil.fromConfigSection(itemSection);
-            if (item == null) {
-                continue;
-            }
-            
+            final ItemStack item = ItemUtil.parseItem(itemSection);
             final ItemMeta itemMeta = item.getItemMeta();
+
             final boolean replaceName = ItemReplacer.needsReplacement(itemMeta.getDisplayName());
             final boolean replaceLore = ItemReplacer.needsReplacement(itemMeta.getLore());
             
@@ -167,7 +167,7 @@ public final class ConfigData {
             loadedItems.put(itemName, item);
             
             this.inventoryItems.put(item, withdrawals);
-            this.replacableItems.put(item, ItemReplacementType.get(replaceName, replaceLore));
+            this.replaceableItems.put(item, ItemReplacementType.get(replaceName, replaceLore));
         }
         
         // Load inventory layout
@@ -194,7 +194,7 @@ public final class ConfigData {
         
         // Load item names
         for (final String nameEntry : cfg.getStringList("itemNames")) {
-            final String[] nameEntrySplit = nameEntry.split("\\s+");
+            final String[] nameEntrySplit = WHITESPACE_PATTERN.split(nameEntry);
             if (nameEntrySplit.length < 2) {
                 this.plugin.getLogger().warning("Incorrect item name: \"" + nameEntry + "\"");
                 continue;
@@ -217,7 +217,7 @@ public final class ConfigData {
 
         this.database = new HikariDataSource();
 
-        if (cfg.getString("dataStorage").equalsIgnoreCase("MYSQL")) {
+        if ("MYSQL".equalsIgnoreCase(cfg.getString("dataStorage"))) {
             final String hostname = cfg.getString("mysql.hostname");
             final String port = cfg.getString("mysql.port");
             final String database = cfg.getString("mysql.database");
@@ -271,7 +271,7 @@ public final class ConfigData {
         this.database.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
         this.database.addDataSourceProperty("useServerPrepStmts", true);
 
-        try (final Connection testConnection = this.database.getConnection()) {
+        try (final Connection ignored = this.database.getConnection()) {
             this.plugin.getLogger().info("Test database connection successful!");
         } catch (final SQLException exception) {
             this.plugin.getLogger().warning("Test database connection failed!");

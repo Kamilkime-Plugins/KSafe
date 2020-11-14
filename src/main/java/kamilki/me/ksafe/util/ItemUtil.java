@@ -1,51 +1,47 @@
-/* Copyright (C) 2019 Kamilkime
+/*
+ * Copyright (C) 2020 Kamil Trysiński
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package kamilki.me.ksafe.util;
 
-import kamilki.me.ksafe.data.ItemData;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
-import java.util.Map;
 
 public final class ItemUtil {
 
-    public static ItemStack fromConfigSection(final ConfigurationSection itemSection) {
+    public static ItemStack parseItem(final ConfigurationSection itemSection) {
         final String[] typeSplit = itemSection.getString("type").split(":");
-        final Material type = Material.matchMaterial(typeSplit[0]);
 
+        Material type = Material.matchMaterial(typeSplit[0]);
         if (type == null) {
+            type = Material.BARRIER;
             Bukkit.getLogger().warning("[ItemParser] No material found with name " + typeSplit[0].toUpperCase());
-            return null;
         }
 
-        final short durability;
+        short durability;
         try {
             durability = typeSplit.length == 1 ? 0 : Short.parseShort(typeSplit[1]);
         } catch (final NumberFormatException exception) {
+            durability = 0;
             Bukkit.getLogger().warning("[ItemParser] " + typeSplit[1] + " is not a valid integer!");
-            return null;
         }
 
         final int amount = itemSection.getInt("amount");
@@ -66,129 +62,28 @@ public final class ItemUtil {
         final List<String> enchants = itemSection.getStringList("enchants");
         if (enchants != null && !enchants.isEmpty()) {
             for (final String enchant : enchants) {
-                final String[] splitEnch = enchant.split(" ");
-                final Enchantment ench = Enchantment.getByName(splitEnch[0].toUpperCase());
+                final String[] enchantSplit = enchant.split(" ");
 
-                if (ench == null) {
-                    Bukkit.getLogger().warning("[ItemParser] No enchantment found with name " + splitEnch[0].toUpperCase());
-                    return null;
+                final Enchantment enchantment = Enchantment.getByName(enchantSplit[0].toUpperCase());
+                if (enchantment == null) {
+                    Bukkit.getLogger().warning("[ItemParser] No enchantment found with name " + enchantSplit[0].toUpperCase());
+                    continue;
                 }
 
-                parsedMeta.addEnchant(ench, splitEnch.length == 1 ? 1 : Integer.parseInt(splitEnch[1]), true);
+                int level;
+                try {
+                    level = enchantSplit.length == 1 ? 1 : Integer.parseInt(enchantSplit[1]);
+                } catch (final NumberFormatException exception) {
+                    level = 1;
+                    Bukkit.getLogger().warning("[ItemParser] " + enchantSplit[1] + " is not a valid integer!");
+                }
+
+                parsedMeta.addEnchant(enchantment, level, true);
             }
         }
 
         parsed.setItemMeta(parsedMeta);
         return parsed;
-    }
-
-    public static int getInventoryAmount(final HumanEntity human, final Material material, final short durability) {
-        int amount = 0;
-
-        for (final ItemStack item : human.getInventory().getContents()) {
-            if (item == null) {
-                continue;
-            }
-
-            if (item.getType() != material) {
-                continue;
-            }
-
-            if (item.getDurability() != durability) {
-                continue;
-            }
-
-            amount += item.getAmount();
-        }
-
-        return amount;
-    }
-
-    public static int getInventoryAmount(final HumanEntity human, final ItemData itemData) {
-        return getInventoryAmount(human, itemData.getMaterial(), itemData.getDurability());
-    }
-    
-    public static int addToInventory(final HumanEntity human, final Material material, final short durability, int amount) {
-        final PlayerInventory inventory = human.getInventory();
-        for (int slot = 0; slot <= 35 && amount > 0; slot++) {
-            final ItemStack item = inventory.getItem(slot);
-            if (item == null) {
-                continue;
-            }
-            
-            if (item.getType() != material) {
-                continue;
-            }
-
-            if (item.getDurability() != durability) {
-                continue;
-            }
-            
-            final int freeSpace = material.getMaxStackSize() - item.getAmount();
-            if (freeSpace <= 0) {
-                continue;
-            }
-            
-            final int afterAddition = amount - freeSpace;
-            if (afterAddition > 0) {
-                item.setAmount(item.getAmount() + freeSpace);
-            } else {
-                item.setAmount(item.getAmount() + amount);
-            }
-            
-            amount = afterAddition;
-        }
-        
-        if (amount > 0) {
-            final Map<Integer, ItemStack> notAdded = inventory.addItem(new ItemStack(material, amount, durability));
-            if (notAdded != null && !notAdded.isEmpty()) {
-                int newAmount = 0;
-                for (final ItemStack notAddedItem : notAdded.values()) {
-                    newAmount += notAddedItem.getAmount();
-                }
-                
-                amount = newAmount;
-            } else {
-                amount = 0;
-            }
-        }
-        
-        return Math.max(amount, 0);
-    }
-    
-    public static int addToInventory(final HumanEntity human, final ItemData itemData, final int amount) {
-        return addToInventory(human, itemData.getMaterial(), itemData.getDurability(), amount);
-    }
-
-    public static void removeFromInventory(final HumanEntity human, final Material material, final short durability, int amount) {
-        final PlayerInventory inventory = human.getInventory();
-        for (int slot = 35; slot >= 0 && amount > 0; slot--) {
-            final ItemStack item = inventory.getItem(slot);
-            if (item == null) {
-                continue;
-            }
-            
-            if (item.getType() != material) {
-                continue;
-            }
-
-            if (item.getDurability() != durability) {
-                continue;
-            }
-            
-            final int afterRemoval = amount - item.getAmount();
-            if (afterRemoval < 0) {
-                item.setAmount(item.getAmount() - amount);
-            } else {
-                inventory.setItem(slot, null);
-            }
-            
-            amount = afterRemoval;
-        }
-    }
-    
-    public static void removeFromInventory(final HumanEntity human, final ItemData itemData, final int amount) {
-        removeFromInventory(human, itemData.getMaterial(), itemData.getDurability(), amount);
     }
 
     private ItemUtil() {}

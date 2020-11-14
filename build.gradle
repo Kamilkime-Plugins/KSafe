@@ -1,27 +1,16 @@
-group 'kamilki.me'
-version '1.0.2'
-
-buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-  }
-  
-  dependencies {
-    classpath "com.github.jengelman.gradle.plugins:shadow:2.0.4"
-  }
+plugins {
+    id 'java-library'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
 }
 
-apply plugin: 'java'
-apply plugin: "com.github.johnrengelman.shadow"
-
-sourceCompatibility = 1.8
+group = 'kamilki.me'
+version = '1.0.3'
 
 repositories {
     mavenCentral()
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-    maven { url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
+
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
 }
 
 dependencies {
@@ -29,6 +18,17 @@ dependencies {
     compile group: 'com.zaxxer', name: 'HikariCP', version: '3.3.0'
 }
 
+import org.apache.tools.ant.filters.ReplaceTokens
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        filter ReplaceTokens, tokens: [version: version]
+    }
+}
+
 shadowJar {
-    archiveName = "KSafe v${version}.jar"
+    relocate 'com.zaxxer.hikari', 'kamilki.me.ksafe.hikari'
+    relocate 'org.slf4j', 'kamilki.me.ksafe.slf4j'
+
+    archiveFileName = "$baseName v$version.$extension"
 }
