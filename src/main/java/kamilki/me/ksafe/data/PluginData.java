@@ -64,7 +64,7 @@ public final class PluginData {
                     final String[] safeDataSplit = resultSet.getString("safeData").split(";");
                     for (final String safeDataEntry : safeDataSplit) {
                         final String[] entrySplit = safeDataEntry.split("-");
-                        userSafe.put(ItemUtil.getMaterial(entrySplit[0]), Integer.parseInt(entrySplit[1]));
+                        userSafe.put(ItemUtil.getMaterial(entrySplit[0].split(":")[0]), Integer.parseInt(entrySplit[1]));
                     }
 
                     this.userSafes.put(user, userSafe);
