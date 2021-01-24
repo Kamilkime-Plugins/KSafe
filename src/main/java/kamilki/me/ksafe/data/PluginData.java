@@ -18,6 +18,7 @@ package kamilki.me.ksafe.data;
 
 import kamilki.me.ksafe.KSafe;
 import kamilki.me.ksafe.util.ItemUtil;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 
@@ -64,7 +65,9 @@ public final class PluginData {
                     final String[] safeDataSplit = resultSet.getString("safeData").split(";");
                     for (final String safeDataEntry : safeDataSplit) {
                         final String[] entrySplit = safeDataEntry.split("-");
-                        userSafe.put(ItemUtil.getMaterial(entrySplit[0].split(":")[0]), Integer.parseInt(entrySplit[1]));
+                        final String materialName = StringUtils.replaceOnce(entrySplit[0].split(":")[0], "LEGACY_", "");
+
+                        userSafe.put(ItemUtil.getMaterial(materialName), Integer.parseInt(entrySplit[1]));
                     }
 
                     this.userSafes.put(user, userSafe);
