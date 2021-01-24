@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Kamil Trysiński
+ * Copyright (C) 2021 Kamil Trysiński
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,8 @@ import kamilki.me.ksafe.data.PluginData;
 import kamilki.me.ksafe.util.InventoryUtil;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.InventoryView;
-import org.bukkit.material.MaterialData;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Map;
@@ -47,28 +46,28 @@ public class LimitTask extends BukkitRunnable {
             }
             
             boolean hasChanged = false;
-            final Map<MaterialData, Integer> userSafe = this.pluginData.userSafes.get(player.getUniqueId());
+            final Map<Material, Integer> userSafe = this.pluginData.userSafes.get(player.getUniqueId());
             
-            for (final Entry<MaterialData, Integer> limit : this.configData.itemLimits.entrySet()) {
-                final MaterialData materialData = limit.getKey();
+            for (final Entry<Material, Integer> limit : this.configData.itemLimits.entrySet()) {
+                final Material material = limit.getKey();
                 final int limitValue = limit.getValue();
                 
-                final int invAmount = InventoryUtil.getInventoryAmount(player, materialData);
+                final int invAmount = InventoryUtil.getInventoryAmount(player, material);
                 if (invAmount <= limitValue) {
                     continue;
                 }
                 
                 final int toRemove = invAmount - limitValue;
-                InventoryUtil.removeFromInventory(player, materialData, toRemove);
+                InventoryUtil.removeFromInventory(player, material, toRemove);
                 
-                final int safeAmount = userSafe.getOrDefault(materialData, 0);
-                userSafe.put(materialData, safeAmount + toRemove);
+                final int safeAmount = userSafe.getOrDefault(material, 0);
+                userSafe.put(material, safeAmount + toRemove);
                 
                 this.pluginData.changedUsers.add(player.getUniqueId());
                 
                 String message = this.configData.itemsTakenMsg;
                 
-                message = StringUtils.replace(message, "{ITEM}", this.configData.itemNames.get(materialData));
+                message = StringUtils.replace(message, "{ITEM}", this.configData.itemNames.get(material));
                 message = StringUtils.replace(message, "{REMOVED}", Integer.toString(toRemove));
                 message = StringUtils.replace(message, "{LIMIT}", Integer.toString(limitValue));
                 message = StringUtils.replace(message, "{OLD-AMOUNT}", Integer.toString(invAmount));
@@ -81,15 +80,7 @@ public class LimitTask extends BukkitRunnable {
             }
             
             if (hasChanged) {
-                final InventoryView openInventory = player.getOpenInventory();
-                if (openInventory == null) {
-                    continue;
-                }
-
-                final String title = openInventory.getTitle();
-                if (title == null || title.isEmpty()) {
-                    continue;
-                }
+                final String title = player.getOpenInventory().getTitle();
 
                 if (!title.equals(this.configData.inventoryTitle)) {
                     continue;

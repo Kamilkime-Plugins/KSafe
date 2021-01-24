@@ -1,16 +1,31 @@
+/*
+ * Copyright (C) 2021 Kamil Trysiński
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package kamilki.me.ksafe.util;
 
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.material.MaterialData;
 
 import java.util.Map;
 
 public final class InventoryUtil {
 
-    public static int getInventoryAmount(final HumanEntity human, final Material material, final short durability) {
+    public static int getInventoryAmount(final HumanEntity human, final Material material) {
         int amount = 0;
 
         for (final ItemStack item : human.getInventory().getContents()) {
@@ -22,21 +37,13 @@ public final class InventoryUtil {
                 continue;
             }
 
-            if (item.getDurability() != durability) {
-                continue;
-            }
-
             amount += item.getAmount();
         }
 
         return amount;
     }
 
-    public static int getInventoryAmount(final HumanEntity human, final MaterialData materialData) {
-        return getInventoryAmount(human, materialData.getItemType(), materialData.getData());
-    }
-
-    public static int addToInventory(final HumanEntity human, final Material material, final short durability, int amount) {
+    public static int addToInventory(final HumanEntity human, final Material material, int amount) {
         final PlayerInventory inventory = human.getInventory();
         for (int slot = 0; slot <= 35 && amount > 0; slot++) {
             final ItemStack item = inventory.getItem(slot);
@@ -45,10 +52,6 @@ public final class InventoryUtil {
             }
 
             if (item.getType() != material) {
-                continue;
-            }
-
-            if (item.getDurability() != durability) {
                 continue;
             }
 
@@ -68,8 +71,8 @@ public final class InventoryUtil {
         }
 
         if (amount > 0) {
-            final Map<Integer, ItemStack> notAdded = inventory.addItem(new ItemStack(material, amount, durability));
-            if (notAdded != null && !notAdded.isEmpty()) {
+            final Map<Integer, ItemStack> notAdded = inventory.addItem(new ItemStack(material, amount));
+            if (!notAdded.isEmpty()) {
                 int newAmount = 0;
                 for (final ItemStack notAddedItem : notAdded.values()) {
                     newAmount += notAddedItem.getAmount();
@@ -84,11 +87,7 @@ public final class InventoryUtil {
         return Math.max(amount, 0);
     }
 
-    public static int addToInventory(final HumanEntity human, final MaterialData materialData, final int amount) {
-        return addToInventory(human, materialData.getItemType(), materialData.getData(), amount);
-    }
-
-    public static void removeFromInventory(final HumanEntity human, final Material material, final short durability, int amount) {
+    public static void removeFromInventory(final HumanEntity human, final Material material, int amount) {
         final PlayerInventory inventory = human.getInventory();
         for (int slot = 35; slot >= 0 && amount > 0; slot--) {
             final ItemStack item = inventory.getItem(slot);
@@ -97,10 +96,6 @@ public final class InventoryUtil {
             }
 
             if (item.getType() != material) {
-                continue;
-            }
-
-            if (item.getDurability() != durability) {
                 continue;
             }
 
@@ -113,10 +108,6 @@ public final class InventoryUtil {
 
             amount = afterRemoval;
         }
-    }
-
-    public static void removeFromInventory(final HumanEntity human, final MaterialData materialData, final int amount) {
-        removeFromInventory(human, materialData.getItemType(), materialData.getData(), amount);
     }
 
     private InventoryUtil() {}

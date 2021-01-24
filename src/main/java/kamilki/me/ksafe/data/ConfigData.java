@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Kamil Trysiński
+ * Copyright (C) 2021 Kamil Trysiński
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ import kamilki.me.ksafe.util.ItemUtil;
 import kamilki.me.ksafe.util.StringUtil;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.MaterialData;
 
 import java.io.File;
 import java.io.IOException;
@@ -71,9 +71,9 @@ public final class ConfigData {
 
     public final List<ItemStack> inventoryLayout = new ArrayList<>();
     
-    public final Map<MaterialData, String> itemNames = new HashMap<>();
-    public final Map<MaterialData, Integer> itemLimits = new HashMap<>();
-    public final Map<ItemStack, Set<MaterialData>> inventoryItems = new HashMap<>();
+    public final Map<Material, String> itemNames = new EnumMap<>(Material.class);
+    public final Map<Material, Integer> itemLimits = new EnumMap<>(Material.class);
+    public final Map<ItemStack, Set<Material>> inventoryItems = new HashMap<>();
     public final Map<ItemStack, ItemReplacementType> replaceableItems = new HashMap<>();
 
     private final KSafe plugin;
@@ -136,31 +136,42 @@ public final class ConfigData {
                 continue;
             }
             
-            this.itemLimits.put(ItemUtil.getMaterialData(limitSplit[0]), limit);
+            this.itemLimits.put(ItemUtil.getMaterial(limitSplit[0]), limit);
         }
         
         // Load inventory items
         final Map<String, ItemStack> loadedItems = new HashMap<>();
-        for (final String itemName : cfg.getConfigurationSection("inventoryItems").getKeys(false)) {
-            final ConfigurationSection itemSection = cfg.getConfigurationSection("inventoryItems." + itemName);
-            
-            final ItemStack item = ItemUtil.parseItem(itemSection);
-            final ItemMeta itemMeta = item.getItemMeta();
 
-            final boolean replaceName = ItemReplacer.needsReplacement(itemMeta.getDisplayName());
-            final boolean replaceLore = ItemReplacer.needsReplacement(itemMeta.getLore());
-            
-            final Set<MaterialData> withdrawals = new HashSet<>();
-            for (final String withdraw : itemSection.getStringList("withdraw")) {
-                withdrawals.add(ItemUtil.getMaterialData(withdraw));
+        final ConfigurationSection inventoryItemsSection = cfg.getConfigurationSection("inventoryItems");
+        if (inventoryItemsSection != null) {
+            for (final String itemName : inventoryItemsSection.getKeys(false)) {
+                final ConfigurationSection itemSection = cfg.getConfigurationSection("inventoryItems." + itemName);
+                if (itemSection == null) {
+                    continue;
+                }
+
+                final ItemStack item = ItemUtil.parseItem(itemSection);
+
+                final ItemMeta itemMeta = item.getItemMeta();
+                if (itemMeta == null) {
+                    continue;
+                }
+
+                final boolean replaceName = ItemReplacer.needsReplacement(itemMeta.getDisplayName());
+                final boolean replaceLore = ItemReplacer.needsReplacement(itemMeta.getLore());
+
+                final Set<Material> withdrawals = EnumSet.noneOf(Material.class);
+                for (final String withdraw : itemSection.getStringList("withdraw")) {
+                    withdrawals.add(ItemUtil.getMaterial(withdraw));
+                }
+
+                loadedItems.put(itemName, item);
+
+                this.inventoryItems.put(item, withdrawals);
+                this.replaceableItems.put(item, ItemReplacementType.get(replaceName, replaceLore));
             }
-            
-            loadedItems.put(itemName, item);
-            
-            this.inventoryItems.put(item, withdrawals);
-            this.replaceableItems.put(item, ItemReplacementType.get(replaceName, replaceLore));
         }
-        
+
         // Load inventory layout
         final List<String> inventoryItemNames = cfg.getStringList("inventory");
         if (inventoryItemNames.size() % 9 != 0) {
@@ -191,7 +202,7 @@ public final class ConfigData {
                 continue;
             }
             
-            this.itemNames.put(ItemUtil.getMaterialData(nameEntrySplit[0]), StringUtils.join(nameEntrySplit, " ", 1, nameEntrySplit.length));
+            this.itemNames.put(ItemUtil.getMaterial(nameEntrySplit[0]), StringUtils.join(nameEntrySplit, " ", 1, nameEntrySplit.length));
         }
     }
 
@@ -232,7 +243,7 @@ public final class ConfigData {
                 return false;
             }
             
-            final File sqliteFile = new File(this.plugin.getDataFolder(), cfg.getString("sqlite.fileName"));
+            final File sqliteFile = new File(this.plugin.getDataFolder(), Objects.requireNonNull(cfg.getString("sqlite.fileName")));
             if (!sqliteFile.exists()) {
                 try {
                     if (!sqliteFile.createNewFile()) {

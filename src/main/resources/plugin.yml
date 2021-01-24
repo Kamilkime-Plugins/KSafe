@@ -1,9 +1,10 @@
 main: kamilki.me.ksafe.KSafe
 name: KSafe
 version: @version@
-author: Kamilkime
+author: "Kamilkime"
 description: "A fully configurable item safe for your server"
 website: "https://github.com/Kamilkime/KSafe"
+api-version: "1.13"
 
 commands:
   ksafe:

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Kamil Trysiński
+ * Copyright (C) 2021 Kamil Trysiński
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package kamilki.me.ksafe.data;
 import kamilki.me.ksafe.KSafe;
 import kamilki.me.ksafe.util.ItemUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.material.MaterialData;
+import org.bukkit.Material;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,7 +34,7 @@ import java.util.logging.Level;
 
 public final class PluginData {
 
-    public final Map<UUID, Map<MaterialData, Integer>> userSafes = new ConcurrentHashMap<>();
+    public final Map<UUID, Map<Material, Integer>> userSafes = new ConcurrentHashMap<>();
     public final Set<UUID> changedUsers = ConcurrentHashMap.newKeySet();
 
     private final KSafe plugin;
@@ -47,7 +47,7 @@ public final class PluginData {
 
     public void loadUsers() {
         Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
-            if (!this.initTable()) {
+            if (this.failTableCreate()) {
                 return;
             }
 
@@ -59,12 +59,12 @@ public final class PluginData {
 
                 while (resultSet.next()) {
                     final UUID user = UUID.fromString(resultSet.getString("uuid"));
-                    final Map<MaterialData, Integer> userSafe = new ConcurrentHashMap<>();
+                    final Map<Material, Integer> userSafe = new ConcurrentHashMap<>();
 
                     final String[] safeDataSplit = resultSet.getString("safeData").split(";");
                     for (final String safeDataEntry : safeDataSplit) {
                         final String[] entrySplit = safeDataEntry.split("-");
-                        userSafe.put(ItemUtil.getMaterialData(entrySplit[0]), Integer.parseInt(entrySplit[1]));
+                        userSafe.put(ItemUtil.getMaterial(entrySplit[0]), Integer.parseInt(entrySplit[1]));
                     }
 
                     this.userSafes.put(user, userSafe);
@@ -76,7 +76,7 @@ public final class PluginData {
     }
 
     public void saveUsers() {
-        if (!this.initTable()) {
+        if (this.failTableCreate()) {
             return;
         }
 
@@ -91,14 +91,11 @@ public final class PluginData {
                         final PreparedStatement stmt = connection.prepareStatement(sql)) {
 
             for (final UUID user : this.changedUsers) {
-                final Map<MaterialData, Integer> safe = this.userSafes.get(user);
+                final Map<Material, Integer> safe = this.userSafes.get(user);
                 final StringBuilder dataBuilder = new StringBuilder();
 
-                for (final Entry<MaterialData, Integer> safeEntry : safe.entrySet()) {
-                    final MaterialData materialData = safeEntry.getKey();
-                    final String materialDataString = materialData.getItemType() + ":" + materialData.getData();
-
-                    dataBuilder.append(";").append(materialDataString).append("-").append(safeEntry.getValue());
+                for (final Entry<Material, Integer> safeEntry : safe.entrySet()) {
+                    dataBuilder.append(";").append(safeEntry.getKey().toString()).append("-").append(safeEntry.getValue());
                 }
 
                 stmt.setString(1, user.toString());
@@ -117,7 +114,7 @@ public final class PluginData {
         }
     }
 
-    private boolean initTable() {
+    private boolean failTableCreate() {
         final String sql = "CREATE TABLE IF NOT EXISTS `" + this.configData.tableName
                         + "` (`uuid` VARCHAR(36) NOT NULL, `safeData` TEXT NOT NULL, PRIMARY KEY(uuid));";
 
@@ -127,10 +124,10 @@ public final class PluginData {
             stmt.executeUpdate();
         } catch (final SQLException exception) {
             Bukkit.getLogger().log(Level.WARNING, "Failed to create database table!", exception);
-            return false;
+            return true;
         }
 
-        return true;
+        return false;
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Kamil Trysiński
+ * Copyright (C) 2021 Kamil Trysiński
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import kamilki.me.ksafe.data.PluginData;
 import kamilki.me.ksafe.util.InventoryUtil;
 import kamilki.me.ksafe.util.ItemUtil;
 import org.apache.commons.lang.StringUtils;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.material.MaterialData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,22 +36,22 @@ public final class ItemReplacer {
     static {
         REPLACEMENT_PREFIXES = new HashMap<>();
 
-        REPLACEMENT_PREFIXES.put("{INV-", (materialData, player, configData, pluginData) -> {
-            return Integer.toString(InventoryUtil.getInventoryAmount(player, materialData));
+        REPLACEMENT_PREFIXES.put("{INV-", (material, player, configData, pluginData) -> {
+            return Integer.toString(InventoryUtil.getInventoryAmount(player, material));
         });
 
-        REPLACEMENT_PREFIXES.put("{LIMIT-", (materialData, player, configData, pluginData) -> {
-            return Integer.toString(configData.itemLimits.getOrDefault(materialData, 0));
+        REPLACEMENT_PREFIXES.put("{LIMIT-", (material, player, configData, pluginData) -> {
+            return Integer.toString(configData.itemLimits.getOrDefault(material, 0));
         });
 
-        REPLACEMENT_PREFIXES.put("{SAFE-", (materialData, player, configData, pluginData) -> {
-            return Integer.toString(pluginData.userSafes.get(player.getUniqueId()).getOrDefault(materialData, 0));
+        REPLACEMENT_PREFIXES.put("{SAFE-", (material, player, configData, pluginData) -> {
+            return Integer.toString(pluginData.userSafes.get(player.getUniqueId()).getOrDefault(material, 0));
         });
 
-        REPLACEMENT_PREFIXES.put("{WITHDRAW-", (materialData, player, configData, pluginData) -> {
-            final int inv = InventoryUtil.getInventoryAmount(player, materialData);
-            final int limit = configData.itemLimits.getOrDefault(materialData, 0);
-            final int safe = pluginData.userSafes.get(player.getUniqueId()).getOrDefault(materialData, 0);
+        REPLACEMENT_PREFIXES.put("{WITHDRAW-", (material, player, configData, pluginData) -> {
+            final int inv = InventoryUtil.getInventoryAmount(player, material);
+            final int limit = configData.itemLimits.getOrDefault(material, 0);
+            final int safe = pluginData.userSafes.get(player.getUniqueId()).getOrDefault(material, 0);
 
             if (configData.withdrawAll) {
                 return Integer.toString(safe);
@@ -64,9 +64,9 @@ public final class ItemReplacer {
             return Integer.toString(Math.min(safe, limit - inv));
         });
 
-        REPLACEMENT_PREFIXES.put("{DEPOSIT-", (materialData, player, configData, pluginData) -> {
-            final int inv = InventoryUtil.getInventoryAmount(player, materialData);
-            final int limit = configData.itemLimits.getOrDefault(materialData, 0);
+        REPLACEMENT_PREFIXES.put("{DEPOSIT-", (material, player, configData, pluginData) -> {
+            final int inv = InventoryUtil.getInventoryAmount(player, material);
+            final int limit = configData.itemLimits.getOrDefault(material, 0);
 
             if (configData.depositAll) {
                 return Integer.toString(inv);
@@ -82,20 +82,20 @@ public final class ItemReplacer {
 
             int occurrence = name.indexOf(prefix);
             while (occurrence >= 0) {
-                final StringBuilder materialDataName = new StringBuilder();
+                final StringBuilder materialName = new StringBuilder();
                 for (int i = occurrence + prefix.length(); i < name.length(); i++) {
                     final char c = name.charAt(i);
                     if (c == '}') {
                         break;
                     }
 
-                    materialDataName.append(c);
+                    materialName.append(c);
                 }
 
-                final MaterialData materialData = ItemUtil.getMaterialData(materialDataName.toString());
-                final String replacementString = replacement.getValue().replace(materialData, player, configData, pluginData);
+                final Material material = ItemUtil.getMaterial(materialName.toString());
+                final String replacementString = replacement.getValue().replace(material, player, configData, pluginData);
 
-                name = StringUtils.replace(name, prefix + materialDataName + "}", replacementString);
+                name = StringUtils.replace(name, prefix + materialName + "}", replacementString);
                 occurrence = name.indexOf(prefix);
             }
         }
@@ -104,6 +104,10 @@ public final class ItemReplacer {
     }
 
     public static List<String> replace(final List<String> lore, final Player player, final ConfigData configData, final PluginData pluginData) {
+        if (lore == null || lore.isEmpty()) {
+            return new ArrayList<>();
+        }
+
         final List<String> replacedLore = new ArrayList<>();
         for (final String loreLine : lore) {
             replacedLore.add(replace(loreLine, player, configData, pluginData));

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Kamil Trysiński
+ * Copyright (C) 2021 Kamil Trysiński
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import kamilki.me.ksafe.task.AutoSupplyTask;
 import kamilki.me.ksafe.task.LimitTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class KSafe extends JavaPlugin {
@@ -53,9 +53,8 @@ public final class KSafe extends JavaPlugin {
         this.pluginData.loadUsers();
         
         if (this.configData.enableAutoSave) {
-            this.getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
-                this.pluginData.saveUsers();
-            }, this.configData.autoSaveInterval, this.configData.autoSaveInterval);
+            this.getServer().getScheduler().runTaskTimerAsynchronously(this, () -> this.pluginData.saveUsers(),
+                    this.configData.autoSaveInterval, this.configData.autoSaveInterval);
         }
         
         if (this.configData.autoLimit) {
@@ -71,7 +70,7 @@ public final class KSafe extends JavaPlugin {
         pluginManager.registerEvents(new PlayerJoinListener(this.pluginData), this);
         pluginManager.registerEvents(new InventoryClickListener(this.configData, this.pluginData), this);
         
-        this.getCommand("ksafe").setExecutor(new SafeCommand(this.configData, this.pluginData));
+        Objects.requireNonNull(this.getCommand("ksafe")).setExecutor(new SafeCommand(this.configData, this.pluginData));
         
         for (final Player player : Bukkit.getOnlinePlayers()) {
             this.pluginData.userSafes.putIfAbsent(player.getUniqueId(), new ConcurrentHashMap<>());
@@ -81,15 +80,7 @@ public final class KSafe extends JavaPlugin {
     @Override
     public void onDisable() {
         for (final Player player : Bukkit.getOnlinePlayers()) {
-            final InventoryView openInventory = player.getOpenInventory();
-            if (openInventory == null) {
-                continue;
-            }
-
-            final String title = openInventory.getTitle();
-            if (title == null || title.isEmpty()) {
-                continue;
-            }
+            final String title = player.getOpenInventory().getTitle();
 
             if (!title.equals(this.configData.inventoryTitle)) {
                 continue;

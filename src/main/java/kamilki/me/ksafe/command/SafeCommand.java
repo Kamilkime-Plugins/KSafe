@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Kamil Trysiński
+ * Copyright (C) 2021 Kamil Trysiński
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -51,15 +50,7 @@ public class SafeCommand implements CommandExecutor {
     public boolean onCommand(final CommandSender sender, final Command cmd, final String label, final String[] args) {
         if (args.length != 0 && reloadArgs.contains(args[0].toLowerCase()) && sender.hasPermission("ksafe.reload")) {
             for (final Player player : Bukkit.getOnlinePlayers()) {
-                final InventoryView openInventory = player.getOpenInventory();
-                if (openInventory == null) {
-                    continue;
-                }
-
-                final String title = openInventory.getTitle();
-                if (title == null || title.isEmpty()) {
-                    continue;
-                }
+                final String title = player.getOpenInventory().getTitle();
 
                 if (!title.equals(this.configData.inventoryTitle)) {
                     continue;
@@ -90,7 +81,11 @@ public class SafeCommand implements CommandExecutor {
             }
 
             final ItemStack clone = item.clone();
+
             final ItemMeta cloneMeta = clone.getItemMeta();
+            if (cloneMeta == null) {
+                return true;
+            }
 
             if (replacementType.replaceName()) {
                 cloneMeta.setDisplayName(ItemReplacer.replace(cloneMeta.getDisplayName(), player, this.configData, this.pluginData));
