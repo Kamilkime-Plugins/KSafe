@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Kamil Trysiński
+ * Copyright (C) 2021 Kamil Trysiński
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,56 +18,43 @@ package kamilki.me.ksafe.util;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.MaterialData;
 
 import java.util.List;
 
 public final class ItemUtil {
 
     public static ItemStack parseItem(final ConfigurationSection itemSection) {
-        final String[] typeSplit = itemSection.getString("type").split(":");
+        final Material material = ItemUtil.getMaterial(itemSection.getString("type"));
+        final ItemStack parsed = new ItemStack(material, Math.min(1, itemSection.getInt("amount", 1)));
 
-        Material type = Material.matchMaterial(typeSplit[0]);
-        if (type == null) {
-            type = Material.BARRIER;
-            Bukkit.getLogger().warning("[ItemParser] No material found with name " + typeSplit[0].toUpperCase());
-        }
-
-        short durability;
-        try {
-            durability = typeSplit.length == 1 ? 0 : Short.parseShort(typeSplit[1]);
-        } catch (final NumberFormatException exception) {
-            durability = 0;
-            Bukkit.getLogger().warning("[ItemParser] " + typeSplit[1] + " is not a valid integer!");
-        }
-
-        final int amount = itemSection.getInt("amount");
-        
-        final ItemStack parsed = new ItemStack(type, amount <= 0 ? 1 : amount, durability);
         final ItemMeta parsedMeta = parsed.getItemMeta();
+        if (parsedMeta == null) {
+            return parsed;
+        }
         
         final String name = itemSection.getString("name", "");
-        if (!name.isEmpty()) {
+        if (name != null && !name.isEmpty()) {
             parsedMeta.setDisplayName(StringUtil.color(name));
         }
 
         final List<String> lore = itemSection.getStringList("lore");
-        if (lore != null && !lore.isEmpty()) {
+        if (!lore.isEmpty()) {
             parsedMeta.setLore(StringUtil.color(lore));
         }
 
         final List<String> enchants = itemSection.getStringList("enchants");
-        if (enchants != null && !enchants.isEmpty()) {
+        if (!enchants.isEmpty()) {
             for (final String enchant : enchants) {
                 final String[] enchantSplit = enchant.split(" ");
 
-                final Enchantment enchantment = Enchantment.getByName(enchantSplit[0].toUpperCase());
+                final Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(enchantSplit[0].toLowerCase()));
                 if (enchantment == null) {
-                    Bukkit.getLogger().warning("[ItemParser] No enchantment found with name " + enchantSplit[0].toUpperCase());
+                    Bukkit.getLogger().warning("[ItemParser] No enchantment found with key " + enchantSplit[0].toLowerCase());
                     continue;
                 }
 
@@ -87,24 +74,18 @@ public final class ItemUtil {
         return parsed;
     }
 
-    public static MaterialData getMaterialData(final String dataString) {
-        final String[] dataSplit = dataString.split(":");
+    public static Material getMaterial(final String materialName) {
+        if (materialName == null || materialName.isEmpty()) {
+            return Material.BARRIER;
+        }
 
-        Material material = Material.matchMaterial(dataSplit[0]);
+        Material material = Material.matchMaterial(materialName);
         if (material == null) {
             material = Material.BARRIER;
-            Bukkit.getLogger().warning("[ItemParser] No material found with name " + dataSplit[0].toUpperCase());
+            Bukkit.getLogger().warning("[ItemParser] No material found with name " + materialName.toUpperCase());
         }
 
-        byte durability;
-        try {
-            durability = dataSplit.length == 1 ? 0 : Byte.parseByte(dataSplit[1]);
-        } catch (final NumberFormatException exception) {
-            durability = 0;
-            Bukkit.getLogger().warning("[ItemParser] " + dataSplit[1] + " is not a valid integer!");
-        }
-
-        return new MaterialData(material, durability);
+        return material;
     }
 
     private ItemUtil() {}

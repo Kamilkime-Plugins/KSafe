@@ -1,21 +1,21 @@
 plugins {
-    id 'java-library'
-    id 'com.github.johnrengelman.shadow' version '5.2.0'
+    id "java-library"
+    id "com.github.johnrengelman.shadow" version "5.2.0"
 }
 
-group = 'kamilki.me'
-version = '1.0.3'
+group = "kamilki.me"
+version = "1.0.4"
 
 repositories {
     mavenCentral()
 
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
-    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
 }
 
 dependencies {
-    compileOnly group: 'org.spigotmc', name: 'spigot-api', version: '1.8.8-R0.1-SNAPSHOT'
-    compile group: 'com.zaxxer', name: 'HikariCP', version: '3.3.0'
+    compileOnly "org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT"
+    implementation "com.zaxxer:HikariCP:3.4.5"
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens
@@ -27,8 +27,8 @@ processResources {
 }
 
 shadowJar {
-    relocate 'com.zaxxer.hikari', 'kamilki.me.ksafe.hikari'
-    relocate 'org.slf4j', 'kamilki.me.ksafe.slf4j'
+    relocate "com.zaxxer.hikari", "kamilki.me.ksafe.hikari"
+    relocate "org.slf4j", "kamilki.me.ksafe.slf4j"
 
     archiveFileName = "$baseName v$version.$extension"
 }

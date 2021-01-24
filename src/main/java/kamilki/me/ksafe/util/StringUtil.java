@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Kamil Trysiński
+ * Copyright (C) 2021 Kamil Trysiński
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,10 @@ import java.util.List;
 public final class StringUtil {
     
     public static String color(final String message) {
+        if (message == null || message.isEmpty()) {
+            return "";
+        }
+
         return ChatColor.translateAlternateColorCodes('&', message);
     }
 

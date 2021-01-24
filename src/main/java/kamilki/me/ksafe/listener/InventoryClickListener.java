@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Kamil Trysiński
+ * Copyright (C) 2021 Kamil Trysiński
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import kamilki.me.ksafe.data.PluginData;
 import kamilki.me.ksafe.util.InventoryUtil;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
@@ -29,7 +30,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 import java.util.Map;
 import java.util.Set;
@@ -61,7 +61,7 @@ public class InventoryClickListener implements Listener {
         }
 
         final ItemStack baseItem = this.configData.inventoryLayout.get(slot);
-        final Set<MaterialData> safeItems = this.configData.inventoryItems.get(baseItem);
+        final Set<Material> safeItems = this.configData.inventoryItems.get(baseItem);
         final HumanEntity human = event.getWhoClicked();
 
         boolean hasChanged = false;
@@ -88,11 +88,11 @@ public class InventoryClickListener implements Listener {
         }
     }
 
-    private boolean withdraw(final HumanEntity human, final Set<MaterialData> safeItems) {
+    private boolean withdraw(final HumanEntity human, final Set<Material> safeItems) {
         boolean hasChanged = false;
-        final Map<MaterialData, Integer> userSafe = this.pluginData.userSafes.get(human.getUniqueId());
+        final Map<Material, Integer> userSafe = this.pluginData.userSafes.get(human.getUniqueId());
 
-        for (final MaterialData itemWithdrawal : safeItems) {
+        for (final Material itemWithdrawal : safeItems) {
             final int limit = this.configData.itemLimits.get(itemWithdrawal);
 
             final int invAmount = InventoryUtil.getInventoryAmount(human, itemWithdrawal);
@@ -142,11 +142,11 @@ public class InventoryClickListener implements Listener {
         return hasChanged;
     }
 
-    private boolean deposit(final HumanEntity human, final Set<MaterialData> safeItems) {
+    private boolean deposit(final HumanEntity human, final Set<Material> safeItems) {
         boolean hasChanged = false;
-        final Map<MaterialData, Integer> userSafe = this.pluginData.userSafes.get(human.getUniqueId());
+        final Map<Material, Integer> userSafe = this.pluginData.userSafes.get(human.getUniqueId());
 
-        for (final MaterialData itemDeposit : safeItems) {
+        for (final Material itemDeposit : safeItems) {
             final int limit = this.configData.itemLimits.get(itemDeposit);
             final int invAmount = InventoryUtil.getInventoryAmount(human, itemDeposit);
             

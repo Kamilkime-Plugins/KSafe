@@ -36,9 +36,9 @@ enableAutoSave: true
 autoSaveInterval: 3000
 
 # Item limits for the players
-# Correct limit syntax: "MATERIAL:durability amount", durability is optional
+# Correct limit syntax: "MATERIAL amount"
 limits:
-- "GOLDEN_APPLE:1 5"
+- "ENCHANTED_GOLDEN_APPLE 5"
 - "GOLDEN_APPLE 10"
 - "ENDER_PEARL 8"
 
@@ -77,38 +77,39 @@ depositAll: true
 
 # Items for the inventory creation
 # Item names (section names) must be unique
+#
 # Supported modifiers:
-#  > type:durability - type and durability of the item, durability is optional
+#  > type - type of the item
 #  > amount - amount of the displayed item
 #  > name - display name of the item
 #  > lore - lore of the item
-#  > enchants - list of item enchants, list items must be of syntax 'enchantment level'
+#  > enchants - list of item enchants, list items must be of syntax "enchantment level"
 #  > withdraw - what type of items will be withdrawn/deposited when clicking on this item
 #
-# Item name and lore can contains following variables:
-#  > {SAFE-type:durability} - how much of the given item is currently in player's safe
-#  > {INV-type:durability} - how much of the given item is currently in player's inventory
-#  > {WITHDRAW-type:durability} - how much of the given item can be withdrawn by the player
-#  > {DEPOSIT-type:durability} - how much of the given item can be deposited by the player
-#  > {LIMIT-type:durability} - what is the limit for the given item
+# Item name and lore can contain following variables:
+#  > {SAFE-type} - how much of the given item is currently in player's safe
+#  > {INV-type} - how much of the given item is currently in player's inventory
+#  > {WITHDRAW-type} - how much of the given item can be withdrawn by the player
+#  > {DEPOSIT-type} - how much of the given item can be deposited by the player
+#  > {LIMIT-type} - what is the limit for the given item
 inventoryItems:
   blank:
-    type: "STAINED_GLASS_PANE:15"
+    type: "BLACK_STAINED_GLASS_PANE"
     name: " "
   enchApple:
-    type: "GOLDEN_APPLE:1"
+    type: "ENCHANTED_GOLDEN_APPLE"
     name: "&6Enchanted apples"
     lore:
-    - "&7In safe: &a{SAFE-GOLDEN_APPLE:1}"
-    - "&7In your inv: &a{INV-GOLDEN_APPLE:1}"
-    - "&7Can withdraw: &a{WITHDRAW-GOLDEN_APPLE:1}"
-    - "&7Can deposit: &a{DEPOSIT-GOLDEN_APPLE:1}"
-    - "&7Limit: &a{LIMIT-GOLDEN_APPLE:1}"
+    - "&7In safe: &a{SAFE-ENCHANTED_GOLDEN_APPLE}"
+    - "&7In your inv: &a{INV-ENCHANTED_GOLDEN_APPLE}"
+    - "&7Can withdraw: &a{WITHDRAW-ENCHANTED_GOLDEN_APPLE}"
+    - "&7Can deposit: &a{DEPOSIT-ENCHANTED_GOLDEN_APPLE}"
+    - "&7Limit: &a{LIMIT-ENCHANTED_GOLDEN_APPLE}"
     - ""
     - "&aLeft click &7to withdraw items"
     - "&aRight click &7to deposit items"
     withdraw:
-    - "GOLDEN_APPLE:1"
+    - "ENCHANTED_GOLDEN_APPLE"
   gApple:
     type: "GOLDEN_APPLE"
     name: "&eGolden apples"
@@ -144,7 +145,7 @@ inventoryItems:
     - "&aLeft click &7to withdraw all items"
     - "&aRight click &7to deposit all items"
     withdraw:
-    - "GOLDEN_APPLE:1"
+    - "ENCHANTED_GOLDEN_APPLE"
     - "GOLDEN_APPLE"
     - "ENDER_PEARL"
 
@@ -186,7 +187,7 @@ inventory:
 
 # Names for the items, used when displaying messages
 itemNames:
-- "GOLDEN_APPLE:1 enchanted apple"
+- "ENCHANTED_GOLDEN_APPLE enchanted apple"
 - "GOLDEN_APPLE golden apple"
 - "ENDER_PEARL ender pearl"
 
