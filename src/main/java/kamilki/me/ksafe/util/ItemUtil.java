@@ -30,7 +30,7 @@ public final class ItemUtil {
 
     public static ItemStack parseItem(final ConfigurationSection itemSection) {
         final Material material = ItemUtil.getMaterial(itemSection.getString("type"));
-        final ItemStack parsed = new ItemStack(material, Math.min(1, itemSection.getInt("amount", 1)));
+        final ItemStack parsed = new ItemStack(material, Math.max(1, itemSection.getInt("amount", 1)));
 
         final ItemMeta parsedMeta = parsed.getItemMeta();
         if (parsedMeta == null) {
