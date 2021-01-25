@@ -52,13 +52,13 @@ public class LimitTask extends BukkitRunnable {
                 final Material material = limit.getKey();
                 final int limitValue = limit.getValue();
                 
-                final int invAmount = InventoryUtil.getInventoryAmount(player, material);
+                final int invAmount = InventoryUtil.getInventoryAmount(player, material, this.configData);
                 if (invAmount <= limitValue) {
                     continue;
                 }
                 
                 final int toRemove = invAmount - limitValue;
-                InventoryUtil.removeFromInventory(player, material, toRemove);
+                InventoryUtil.removeFromInventory(player, material, toRemove, this.configData);
                 
                 final int safeAmount = userSafe.getOrDefault(material, 0);
                 userSafe.put(material, safeAmount + toRemove);

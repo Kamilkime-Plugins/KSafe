@@ -52,7 +52,7 @@ public class AutoSupplyTask extends BukkitRunnable {
                 final Material material = limit.getKey();
                 final int limitValue = limit.getValue();
                 
-                final int invAmount = InventoryUtil.getInventoryAmount(player, material);
+                final int invAmount = InventoryUtil.getInventoryAmount(player, material, this.configData);
                 if (invAmount >= limitValue) {
                     continue;
                 }
@@ -63,7 +63,7 @@ public class AutoSupplyTask extends BukkitRunnable {
                 }
                 
                 final int toSupply = Math.min(safeAmount, limitValue - invAmount);
-                final int notAdded = InventoryUtil.addToInventory(player, material, toSupply);
+                final int notAdded = InventoryUtil.addToInventory(player, material, toSupply, this.configData);
                 
                 final int newSafeAmount = userSafe.getOrDefault(material, 0) - toSupply + notAdded;
                 userSafe.put(material, newSafeAmount);

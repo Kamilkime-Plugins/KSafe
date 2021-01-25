@@ -69,6 +69,7 @@ public final class ConfigData {
     public boolean depositAll;
     public boolean usesMysql;
 
+    public final List<Integer> searchSlots = new ArrayList<>();
     public final List<ItemStack> inventoryLayout = new ArrayList<>();
     
     public final Map<Material, String> itemNames = new EnumMap<>(Material.class);
@@ -89,6 +90,7 @@ public final class ConfigData {
             this.replaceableItems.clear();
             this.inventoryLayout.clear();
             this.inventoryItems.clear();
+            this.searchSlots.clear();
             this.itemLimits.clear();
             
             this.plugin.reloadConfig();
@@ -119,7 +121,66 @@ public final class ConfigData {
         this.withdrawAll = cfg.getBoolean("withdrawAll");
         this.allowInvSafeDeposit = cfg.getBoolean("allowInvSafeDeposit");
         this.depositAll = cfg.getBoolean("depositAll");
-        
+
+        // Load slots to search
+        for (final String searchPart : Objects.requireNonNull(cfg.getString("searchSlots")).split(",")) {
+            final String[] partSplit = searchPart.split("-");
+
+            if (partSplit.length == 1) {
+                try {
+                    final int slot = Integer.parseInt(partSplit[0]);
+
+                    if (slot < 0 || slot > 40) {
+                        Bukkit.getLogger().warning("[SearchSlot] Players have slots from 0 to 40!");
+                        continue;
+                    }
+
+                    this.searchSlots.add(slot);
+                    continue;
+                } catch (final NumberFormatException exception) {
+                    Bukkit.getLogger().warning("[SearchSlot] " + partSplit[0] + " is not a valid integer!");
+                    continue;
+                }
+            }
+
+            final int min;
+            try {
+                min = Integer.parseInt(partSplit[0]);
+
+                if (min < 0 || min > 40) {
+                    Bukkit.getLogger().warning("[SearchSlot] Players have slots from 0 to 40!");
+                    continue;
+                }
+            } catch (final NumberFormatException exception) {
+                Bukkit.getLogger().warning("[SearchSlot] " + partSplit[0] + " is not a valid integer!");
+                continue;
+            }
+
+            final int max;
+            try {
+                max = Integer.parseInt(partSplit[1]);
+
+                if (max < 0 || max > 40) {
+                    Bukkit.getLogger().warning("[SearchSlot] Players have slots from 0 to 40!");
+                    continue;
+                }
+            } catch (final NumberFormatException exception) {
+                Bukkit.getLogger().warning("[SearchSlot] " + partSplit[1] + " is not a valid integer!");
+                continue;
+            }
+
+            if (min > max) {
+                Bukkit.getLogger().warning("[SearchSlot] First slot in range must be smaller than the second!");
+                continue;
+            }
+
+            for (int i = min; i <= max; i++) {
+                this.searchSlots.add(i);
+            }
+        }
+
+        Collections.sort(this.searchSlots);
+
         // Load item limits
         for (final String limitString : cfg.getStringList("limits")) {
             final String[] limitSplit = WHITESPACE_PATTERN.split(limitString);

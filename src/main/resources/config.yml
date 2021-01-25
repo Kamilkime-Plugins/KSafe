@@ -35,6 +35,17 @@ enableAutoSave: true
 # Interval for the auto save task, in ticks (1 second = 20 ticks)
 autoSaveInterval: 3000
 
+# In which slots should the plugin look for items to limit (or for a free space to add items from safe)
+# Slots can be given as range (0-35) or as single slots (40)
+# Ranges must have a hyphen, individual slots or ranges must be separated by a comma
+#
+# Possible slots values:
+# 0 to 8 - hotbar
+# 9 to 35 - main inventory
+# 36 to 39 - armor slots
+# 40 - second hand
+searchSlots: "0-35,40"
+
 # Item limits for the players
 # Correct limit syntax: "MATERIAL amount"
 limits:

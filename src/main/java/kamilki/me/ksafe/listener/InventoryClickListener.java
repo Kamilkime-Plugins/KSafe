@@ -95,7 +95,7 @@ public class InventoryClickListener implements Listener {
         for (final Material itemWithdrawal : safeItems) {
             final int limit = this.configData.itemLimits.get(itemWithdrawal);
 
-            final int invAmount = InventoryUtil.getInventoryAmount(human, itemWithdrawal);
+            final int invAmount = InventoryUtil.getInventoryAmount(human, itemWithdrawal, this.configData);
             if (!this.configData.withdrawAll && invAmount >= limit) {
                 String message = this.configData.cantWithdrawMsg;
 
@@ -118,7 +118,7 @@ public class InventoryClickListener implements Listener {
             }
 
             final int toSupply = this.configData.withdrawAll ? safeAmount : Math.min(safeAmount, limit - invAmount);
-            final int notAdded = InventoryUtil.addToInventory(human, itemWithdrawal, toSupply);
+            final int notAdded = InventoryUtil.addToInventory(human, itemWithdrawal, toSupply, this.configData);
 
             final int newSafeAmount = userSafe.getOrDefault(itemWithdrawal, 0) - toSupply + notAdded;
             userSafe.put(itemWithdrawal, newSafeAmount);
@@ -148,7 +148,7 @@ public class InventoryClickListener implements Listener {
 
         for (final Material itemDeposit : safeItems) {
             final int limit = this.configData.itemLimits.get(itemDeposit);
-            final int invAmount = InventoryUtil.getInventoryAmount(human, itemDeposit);
+            final int invAmount = InventoryUtil.getInventoryAmount(human, itemDeposit, this.configData);
             
             final int toDeposit = this.configData.depositAll ? invAmount : invAmount - limit;
             if (toDeposit <= 0) {
@@ -162,7 +162,7 @@ public class InventoryClickListener implements Listener {
                 continue;
             }
 
-            InventoryUtil.removeFromInventory(human, itemDeposit, toDeposit);
+            InventoryUtil.removeFromInventory(human, itemDeposit, toDeposit, this.configData);
             
             final int safeAmount = userSafe.getOrDefault(itemDeposit, 0);
             userSafe.put(itemDeposit, safeAmount + toDeposit);
