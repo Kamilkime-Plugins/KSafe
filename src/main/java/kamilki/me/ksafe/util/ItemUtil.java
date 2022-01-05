@@ -49,6 +49,10 @@ public final class ItemUtil {
         
         final ItemStack parsed = new ItemStack(type, amount <= 0 ? 1 : amount, durability);
         final ItemMeta parsedMeta = parsed.getItemMeta();
+
+        if (parsedMeta == null) {
+            return parsed;
+        }
         
         final String name = itemSection.getString("name", "");
         if (!name.isEmpty()) {
