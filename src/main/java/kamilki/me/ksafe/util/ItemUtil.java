@@ -38,7 +38,7 @@ public final class ItemUtil {
         }
         
         final String name = itemSection.getString("name", "");
-        if (name != null && !name.isEmpty()) {
+        if (!name.isEmpty()) {
             parsedMeta.setDisplayName(StringUtil.color(name));
         }
 

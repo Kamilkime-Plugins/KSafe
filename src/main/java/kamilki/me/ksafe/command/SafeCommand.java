@@ -17,6 +17,9 @@
 package kamilki.me.ksafe.command;
 
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import kamilki.me.ksafe.data.ConfigData;
 import kamilki.me.ksafe.data.PluginData;
 import kamilki.me.ksafe.replacement.ItemReplacementType;
@@ -29,10 +32,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 public class SafeCommand implements CommandExecutor {
 
@@ -81,21 +80,20 @@ public class SafeCommand implements CommandExecutor {
             }
 
             final ItemStack clone = item.clone();
-
             final ItemMeta cloneMeta = clone.getItemMeta();
-            if (cloneMeta == null) {
-                return true;
+
+            if (cloneMeta != null) {
+                if (replacementType.replaceName()) {
+                    cloneMeta.setDisplayName(ItemReplacer.replace(cloneMeta.getDisplayName(), player, this.configData, this.pluginData));
+                }
+
+                if (replacementType.replaceLore()) {
+                    cloneMeta.setLore(ItemReplacer.replace(cloneMeta.getLore(), player, this.configData, this.pluginData));
+                }
+
+                clone.setItemMeta(cloneMeta);
             }
 
-            if (replacementType.replaceName()) {
-                cloneMeta.setDisplayName(ItemReplacer.replace(cloneMeta.getDisplayName(), player, this.configData, this.pluginData));
-            }
-
-            if (replacementType.replaceLore()) {
-                cloneMeta.setLore(ItemReplacer.replace(cloneMeta.getLore(), player, this.configData, this.pluginData));
-            }
-
-            clone.setItemMeta(cloneMeta);
             inventoryItems.add(clone);
         }
 

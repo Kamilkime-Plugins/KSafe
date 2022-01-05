@@ -212,14 +212,17 @@ public final class ConfigData {
                 }
 
                 final ItemStack item = ItemUtil.parseItem(itemSection);
-
                 final ItemMeta itemMeta = item.getItemMeta();
-                if (itemMeta == null) {
-                    continue;
-                }
 
-                final boolean replaceName = ItemReplacer.needsReplacement(itemMeta.getDisplayName());
-                final boolean replaceLore = ItemReplacer.needsReplacement(itemMeta.getLore());
+                final ItemReplacementType replacementType;
+                if (itemMeta == null) {
+                    replacementType = ItemReplacementType.NONE;
+                } else {
+                    final boolean replaceName = ItemReplacer.needsReplacement(itemMeta.getDisplayName());
+                    final boolean replaceLore = ItemReplacer.needsReplacement(itemMeta.getLore());
+
+                    replacementType = ItemReplacementType.get(replaceName, replaceLore);
+                }
 
                 final Set<Material> withdrawals = EnumSet.noneOf(Material.class);
                 for (final String withdraw : itemSection.getStringList("withdraw")) {
@@ -229,7 +232,7 @@ public final class ConfigData {
                 loadedItems.put(itemName, item);
 
                 this.inventoryItems.put(item, withdrawals);
-                this.replaceableItems.put(item, ItemReplacementType.get(replaceName, replaceLore));
+                this.replaceableItems.put(item, replacementType);
             }
         }
 
