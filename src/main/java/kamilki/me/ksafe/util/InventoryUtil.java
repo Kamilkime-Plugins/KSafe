@@ -1,35 +1,22 @@
 package kamilki.me.ksafe.util;
 
+import java.util.Arrays;
+import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.MaterialData;
 
-import java.util.Map;
-
 public final class InventoryUtil {
 
     public static int getInventoryAmount(final HumanEntity human, final Material material, final short durability) {
-        int amount = 0;
-
-        for (final ItemStack item : human.getInventory().getContents()) {
-            if (item == null) {
-                continue;
-            }
-
-            if (item.getType() != material) {
-                continue;
-            }
-
-            if (item.getDurability() != durability) {
-                continue;
-            }
-
-            amount += item.getAmount();
-        }
-
-        return amount;
+        return Arrays.stream(human.getInventory().getContents())
+                .filter(Objects::nonNull)
+                .filter(item -> item.getType() == material)
+                .filter(item -> item.getDurability() == durability)
+                .mapToInt(ItemStack::getAmount)
+                .sum();
     }
 
     public static int getInventoryAmount(final HumanEntity human, final MaterialData materialData) {
@@ -38,17 +25,11 @@ public final class InventoryUtil {
 
     public static int addToInventory(final HumanEntity human, final Material material, final short durability, int amount) {
         final PlayerInventory inventory = human.getInventory();
-        for (int slot = 0; slot <= 35 && amount > 0; slot++) {
+
+        for (int slot = 0; slot <= 35; slot++) {
             final ItemStack item = inventory.getItem(slot);
-            if (item == null) {
-                continue;
-            }
 
-            if (item.getType() != material) {
-                continue;
-            }
-
-            if (item.getDurability() != durability) {
+            if (item == null || item.getType() != material || item.getDurability() != durability) {
                 continue;
             }
 
@@ -58,27 +39,21 @@ public final class InventoryUtil {
             }
 
             final int afterAddition = amount - freeSpace;
-            if (afterAddition > 0) {
-                item.setAmount(item.getAmount() + freeSpace);
-            } else {
+            if (afterAddition <= 0) {
                 item.setAmount(item.getAmount() + amount);
+                amount = 0;
+                break;
             }
 
+            item.setAmount(item.getAmount() + freeSpace);
             amount = afterAddition;
         }
 
         if (amount > 0) {
-            final Map<Integer, ItemStack> notAdded = inventory.addItem(new ItemStack(material, amount, durability));
-            if (notAdded != null && !notAdded.isEmpty()) {
-                int newAmount = 0;
-                for (final ItemStack notAddedItem : notAdded.values()) {
-                    newAmount += notAddedItem.getAmount();
-                }
-
-                amount = newAmount;
-            } else {
-                amount = 0;
-            }
+            amount = inventory.addItem(new ItemStack(material, amount, durability)).values().stream()
+                    .filter(Objects::nonNull)
+                    .mapToInt(ItemStack::getAmount)
+                    .sum();
         }
 
         return Math.max(amount, 0);
@@ -90,27 +65,26 @@ public final class InventoryUtil {
 
     public static void removeFromInventory(final HumanEntity human, final Material material, final short durability, int amount) {
         final PlayerInventory inventory = human.getInventory();
-        for (int slot = 35; slot >= 0 && amount > 0; slot--) {
+
+        for (int slot = 35; slot >= 0; slot--) {
             final ItemStack item = inventory.getItem(slot);
-            if (item == null) {
-                continue;
-            }
 
-            if (item.getType() != material) {
-                continue;
-            }
-
-            if (item.getDurability() != durability) {
+            if (item == null || item.getType() != material || item.getDurability() != durability) {
                 continue;
             }
 
             final int afterRemoval = amount - item.getAmount();
             if (afterRemoval < 0) {
                 item.setAmount(item.getAmount() - amount);
-            } else {
-                inventory.setItem(slot, null);
+                break;
             }
 
+            if (afterRemoval == 0) {
+                inventory.setItem(slot, null);
+                break;
+            }
+
+            inventory.setItem(slot, null);
             amount = afterRemoval;
         }
     }
