@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "kamilki.me"
-version = "1.0.5"
+version = "1.0.6"
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -20,7 +20,7 @@ repositories {
 
 dependencies {
     shadow "org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT"
-    implementation "com.zaxxer:HikariCP:4.0.3"
+    implementation 'com.zaxxer:HikariCP:5.0.1'
 }
 
 processResources {

@@ -16,37 +16,23 @@
 
 package kamilki.me.ksafe.util;
 
+import com.google.common.collect.Lists;
+import java.util.Objects;
 import kamilki.me.ksafe.data.ConfigData;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-
-import java.util.List;
-import java.util.Map;
 
 public final class InventoryUtil {
 
     public static int getInventoryAmount(final HumanEntity human, final Material material, final ConfigData configData) {
-        int amount = 0;
-
-        final Inventory inventory = human.getInventory();
-        for (final int slot : configData.searchSlots) {
-            final ItemStack item = inventory.getItem(slot);
-
-            if (item == null) {
-                continue;
-            }
-
-            if (item.getType() != material) {
-                continue;
-            }
-
-            amount += item.getAmount();
-        }
-
-        return amount;
+        return configData.searchSlots.stream()
+                .map(slot -> human.getInventory().getItem(slot))
+                .filter(Objects::nonNull)
+                .filter(item -> item.getType() == material)
+                .mapToInt(ItemStack::getAmount)
+                .sum();
     }
 
     public static int addToInventory(final HumanEntity human, final Material material, int amount, final ConfigData configData) {
@@ -54,11 +40,8 @@ public final class InventoryUtil {
 
         for (final int slot : configData.searchSlots) {
             final ItemStack item = inventory.getItem(slot);
-            if (item == null) {
-                continue;
-            }
 
-            if (item.getType() != material) {
+            if (item == null || item.getType() != material) {
                 continue;
             }
 
@@ -68,27 +51,21 @@ public final class InventoryUtil {
             }
 
             final int afterAddition = amount - freeSpace;
-            if (afterAddition > 0) {
-                item.setAmount(item.getAmount() + freeSpace);
-            } else {
+            if (afterAddition <= 0) {
                 item.setAmount(item.getAmount() + amount);
+                amount = 0;
+                break;
             }
 
+            item.setAmount(item.getAmount() + freeSpace);
             amount = afterAddition;
         }
 
         if (amount > 0) {
-            final Map<Integer, ItemStack> notAdded = inventory.addItem(new ItemStack(material, amount));
-            if (!notAdded.isEmpty()) {
-                int newAmount = 0;
-                for (final ItemStack notAddedItem : notAdded.values()) {
-                    newAmount += notAddedItem.getAmount();
-                }
-
-                amount = newAmount;
-            } else {
-                amount = 0;
-            }
+            amount = inventory.addItem(new ItemStack(material, amount)).values().stream()
+                    .filter(Objects::nonNull)
+                    .mapToInt(ItemStack::getAmount)
+                    .sum();
         }
 
         return Math.max(amount, 0);
@@ -97,25 +74,25 @@ public final class InventoryUtil {
     public static void removeFromInventory(final HumanEntity human, final Material material, int amount, final ConfigData configData) {
         final PlayerInventory inventory = human.getInventory();
 
-        final List<Integer> slots = configData.searchSlots;
-        for (int slotIndex = slots.size() - 1; slotIndex >= 0; slotIndex--) {
-            final ItemStack item = inventory.getItem(slots.get(slotIndex));
+        for (final int slot : Lists.reverse(configData.searchSlots)) {
+            final ItemStack item = inventory.getItem(slot);
 
-            if (item == null) {
-                continue;
-            }
-
-            if (item.getType() != material) {
+            if (item == null || item.getType() != material) {
                 continue;
             }
 
             final int afterRemoval = amount - item.getAmount();
             if (afterRemoval < 0) {
                 item.setAmount(item.getAmount() - amount);
-            } else {
-                inventory.setItem(slots.get(slotIndex), null);
+                break;
             }
 
+            if (afterRemoval == 0) {
+                inventory.setItem(slot, null);
+                break;
+            }
+
+            inventory.setItem(slot, null);
             amount = afterRemoval;
         }
     }
