@@ -46,6 +46,10 @@ autoSaveInterval: 3000
 # 40 - second hand
 searchSlots: "0-35,40"
 
+# [EXPERIMENTAL FUNCTION]
+# Whether to count items in cursor for the item limit count
+searchCursor: true
+
 # Item limits for the players
 # Correct limit syntax: "MATERIAL amount"
 limits:

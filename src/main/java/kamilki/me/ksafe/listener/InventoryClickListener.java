@@ -16,6 +16,8 @@
 
 package kamilki.me.ksafe.listener;
 
+import java.util.Map;
+import java.util.Set;
 import kamilki.me.ksafe.data.ConfigData;
 import kamilki.me.ksafe.data.PluginData;
 import kamilki.me.ksafe.util.InventoryUtil;
@@ -30,9 +32,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.Map;
-import java.util.Set;
 
 public class InventoryClickListener implements Listener {
 
@@ -95,7 +94,7 @@ public class InventoryClickListener implements Listener {
         for (final Material itemWithdrawal : safeItems) {
             final int limit = this.configData.itemLimits.get(itemWithdrawal);
 
-            final int invAmount = InventoryUtil.getInventoryAmount(human, itemWithdrawal, this.configData);
+            final int invAmount = InventoryUtil.getInventoryAmount(human, itemWithdrawal, this.configData, this.pluginData);
             if (!this.configData.withdrawAll && invAmount >= limit) {
                 String message = this.configData.cantWithdrawMsg;
 
@@ -138,7 +137,7 @@ public class InventoryClickListener implements Listener {
             human.sendMessage(message);
             hasChanged = true;
         }
-        
+
         return hasChanged;
     }
 
@@ -148,8 +147,8 @@ public class InventoryClickListener implements Listener {
 
         for (final Material itemDeposit : safeItems) {
             final int limit = this.configData.itemLimits.get(itemDeposit);
-            final int invAmount = InventoryUtil.getInventoryAmount(human, itemDeposit, this.configData);
-            
+            final int invAmount = InventoryUtil.getInventoryAmount(human, itemDeposit, this.configData, this.pluginData);
+
             final int toDeposit = this.configData.depositAll ? invAmount : invAmount - limit;
             if (toDeposit <= 0) {
                 String message = this.configData.cantDepositMsg;
@@ -163,12 +162,12 @@ public class InventoryClickListener implements Listener {
             }
 
             InventoryUtil.removeFromInventory(human, itemDeposit, toDeposit, this.configData);
-            
+
             final int safeAmount = userSafe.getOrDefault(itemDeposit, 0);
             userSafe.put(itemDeposit, safeAmount + toDeposit);
-            
+
             this.pluginData.changedUsers.add(human.getUniqueId());
-            
+
             String message = this.configData.itemsDepositedMsg;
 
             message = StringUtils.replace(message, "{ITEM}", this.configData.itemNames.get(itemDeposit));
@@ -182,8 +181,7 @@ public class InventoryClickListener implements Listener {
             human.sendMessage(message);
             hasChanged = true;
         }
-        
+
         return hasChanged;
     }
-
 }

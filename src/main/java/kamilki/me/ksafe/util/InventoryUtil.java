@@ -17,8 +17,11 @@
 package kamilki.me.ksafe.util;
 
 import com.google.common.collect.Lists;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import kamilki.me.ksafe.data.ConfigData;
+import kamilki.me.ksafe.data.PluginData;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
@@ -26,13 +29,32 @@ import org.bukkit.inventory.PlayerInventory;
 
 public final class InventoryUtil {
 
-    public static int getInventoryAmount(final HumanEntity human, final Material material, final ConfigData configData) {
-        return configData.searchSlots.stream()
+    public static int getInventoryAmount(
+            final HumanEntity human,
+            final Material material,
+            final ConfigData configData,
+            final PluginData pluginData
+    ) {
+        final int slotsSum = configData.searchSlots.stream()
                 .map(slot -> human.getInventory().getItem(slot))
                 .filter(Objects::nonNull)
                 .filter(item -> item.getType() == material)
                 .mapToInt(ItemStack::getAmount)
                 .sum();
+
+        final int cursorAmount;
+        if (configData.searchCursor) {
+            final Entry<Material, Integer> cursor = pluginData.cursorCache.get(human.getUniqueId());
+            if (cursor != null && cursor.getKey() == material) {
+                cursorAmount = cursor.getValue();
+            } else {
+                cursorAmount = 0;
+            }
+        } else {
+            cursorAmount = 0;
+        }
+
+        return slotsSum + cursorAmount;
     }
 
     public static int addToInventory(final HumanEntity human, final Material material, int amount, final ConfigData configData) {

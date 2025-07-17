@@ -35,6 +35,7 @@ import java.util.logging.Level;
 
 public final class PluginData {
 
+    public final Map<UUID, Entry<Material, Integer>> cursorCache = new ConcurrentHashMap<>();
     public final Map<UUID, Map<Material, Integer>> userSafes = new ConcurrentHashMap<>();
     public final Set<UUID> changedUsers = ConcurrentHashMap.newKeySet();
 

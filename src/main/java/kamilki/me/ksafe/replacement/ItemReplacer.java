@@ -37,7 +37,7 @@ public final class ItemReplacer {
         REPLACEMENT_PREFIXES = new HashMap<>();
 
         REPLACEMENT_PREFIXES.put("{INV-", (material, player, configData, pluginData) -> {
-            return Integer.toString(InventoryUtil.getInventoryAmount(player, material, configData));
+            return Integer.toString(InventoryUtil.getInventoryAmount(player, material, configData, pluginData));
         });
 
         REPLACEMENT_PREFIXES.put("{LIMIT-", (material, player, configData, pluginData) -> {
@@ -49,7 +49,7 @@ public final class ItemReplacer {
         });
 
         REPLACEMENT_PREFIXES.put("{WITHDRAW-", (material, player, configData, pluginData) -> {
-            final int inv = InventoryUtil.getInventoryAmount(player, material, configData);
+            final int inv = InventoryUtil.getInventoryAmount(player, material, configData, pluginData);
             final int limit = configData.itemLimits.getOrDefault(material, 0);
             final int safe = pluginData.userSafes.get(player.getUniqueId()).getOrDefault(material, 0);
 
@@ -65,7 +65,7 @@ public final class ItemReplacer {
         });
 
         REPLACEMENT_PREFIXES.put("{DEPOSIT-", (material, player, configData, pluginData) -> {
-            final int inv = InventoryUtil.getInventoryAmount(player, material, configData);
+            final int inv = InventoryUtil.getInventoryAmount(player, material, configData, pluginData);
             final int limit = configData.itemLimits.getOrDefault(material, 0);
 
             if (configData.depositAll) {

@@ -60,6 +60,7 @@ public final class ConfigData {
     public long limitTaskInterval;
     public long autoSupplyTaskInterval;
 
+    public boolean searchCursor;
     public boolean enableAutoSave;
     public boolean autoLimit;
     public boolean autoSupply;
@@ -113,7 +114,8 @@ public final class ConfigData {
         this.autoSaveInterval = cfg.getLong("autoSaveInterval");
         this.limitTaskInterval = cfg.getLong("limitTaskInterval");
         this.autoSupplyTaskInterval = cfg.getLong("autoSupplyTaskInterval");
-        
+
+        this.searchCursor = cfg.getBoolean("searchCursor");
         this.enableAutoSave = cfg.getBoolean("enableAutoSave");
         this.autoLimit = cfg.getBoolean("autoLimit");
         this.autoSupply = cfg.getBoolean("autoSupply");

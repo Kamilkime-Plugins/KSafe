@@ -52,7 +52,7 @@ public class AutoSupplyTask extends BukkitRunnable {
                 final Material material = limit.getKey();
                 final int limitValue = limit.getValue();
                 
-                final int invAmount = InventoryUtil.getInventoryAmount(player, material, this.configData);
+                final int invAmount = InventoryUtil.getInventoryAmount(player, material, this.configData, this.pluginData);
                 if (invAmount >= limitValue) {
                     continue;
                 }
